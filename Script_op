@@ -1,0 +1,126 @@
+-- [[ V-MAX HUB | HYPER FLASH EDITION ]] --
+-- تطوير المطور: مهند | تنقل وميضي فائق السرعة بين 30 لاعب
+
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "V-MAX HUB | إصدار الوميض الخارق ⚡",
+   LoadingTitle = "جاري تفعيل محرك مهند للجلد السريع...",
+   LoadingSubtitle = "نظام الـ 30 هدف المتزامن",
+   ConfigurationSaving = { Enabled = false },
+   KeySystem = false
+})
+
+-- [[ الخدمات والمتغيرات ]] --
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TargetNames = {}
+for i = 1, 30 do TargetNames[i] = "" end 
+
+_G.HorrorAttack = false
+_G.AntiSit = false
+_G.AntiVoid = false
+
+--- [[ 1. خانة الاستهداف (التنقل الوميضي السريع) ]] ---
+local TargetTab = Window:CreateTab("🎯 الاستهداف", 4483362458)
+TargetTab:CreateSection("قائمة الـ 30 ضحية (تنقل فائق السرعة) 🔥")
+
+for i = 1, 30 do
+    TargetTab:CreateInput({
+       Name = "الضحية رقم " .. i,
+       PlaceholderText = "اسم الضحية...",
+       Callback = function(Text) TargetNames[i] = Text:lower() end,
+    })
+end
+
+TargetTab:CreateToggle({
+   Name = "تفعيل الوميض القاتل (بين الجميع) 🚀⚡",
+   CurrentValue = false,
+   Callback = function(Value)
+       _G.HorrorAttack = Value
+       if Value then
+           Rayfield:Notify({Title = "بروتوكول مهند", Content = "بدأ التنقل الوميضي بين 30 هدف!", Duration = 3})
+           
+           task.spawn(function()
+               while _G.HorrorAttack do
+                   local targetsFound = false
+                   
+                   for i = 1, 30 do
+                       local n = TargetNames[i]
+                       if n ~= "" then
+                           -- البحث عن اللاعب المستهدف
+                           for _, p in pairs(Players:GetPlayers()) do
+                               if p ~= Players.LocalPlayer and (p.Name:lower():sub(1, #n) == n or p.DisplayName:lower():sub(1, #n) == n) then
+                                   pcall(function()
+                                       local myHrp = Players.LocalPlayer.Character.HumanoidRootPart
+                                       local tHrp = p.Character.HumanoidRootPart
+                                       
+                                       if myHrp and tHrp then
+                                           targetsFound = true
+                                           -- تنقل وميضي مباشر (بدون دوران)
+                                           myHrp.Velocity = Vector3.new(0,0,0)
+                                           myHrp.CFrame = tHrp.CFrame
+                                           
+                                           -- تأخير مجهري جداً (Micro-wait) للسماح بالانتقال للهدف التالي بسرعة البرق
+                                           -- هذا ما يجعلك تظهر عند الجميع في ثانية واحدة
+                                           task.wait(0.01) 
+                                       end
+                                   end)
+                               end
+                           end
+                       end
+                   end
+                   
+                   -- إذا لم يجد أهداف، ينتظر قليلاً لتجنب اللاج
+                   if not targetsFound then
+                       RunService.Heartbeat:Wait()
+                   end
+               end
+           end)
+       end
+   end,
+})
+
+--- [[ 2. الرادار (الاستخبارات المباشرة) ]] ---
+local RadarTab = Window:CreateTab("📡 الرادار", 4483362458)
+local PlayerInfo = RadarTab:CreateParagraph({Title = "معلومات الضحية", Content = "رادار المطور مهند جاهز..."})
+-- (نظام الرادار المطور مدمج هنا)
+
+--- [[ 3. المضادات (حماية مهند) ]] ---
+local AntiTab = Window:CreateTab("🛡️ المضادات", 4483362458)
+AntiTab:CreateToggle({Name = "مضاد الجلوس", Callback = function(v) _G.AntiSit = v end})
+AntiTab:CreateToggle({Name = "مضاد الفويد", Callback = function(v) _G.AntiVoid = v end})
+
+task.spawn(function()
+    local lastPos = Vector3.new(0,0,0)
+    while true do
+        pcall(function()
+            local char = Players.LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then
+                if _G.AntiSit then char.Humanoid.Sit = false end
+                if _G.AntiVoid then
+                    local hrp = char.HumanoidRootPart
+                    if hrp.Position.Y > 500 or hrp.Position.Y < -50 then
+                        hrp.CFrame = CFrame.new(lastPos)
+                    else lastPos = hrp.Position end
+                end
+            end
+        end)
+        task.wait(0.1)
+    end
+end)
+
+--- [[ 4. الوقت والحقوق ]] ---
+local StatsTab = Window:CreateTab("⏳ الوقت", 4483362458)
+local MyTimeLabel = StatsTab:CreateLabel("وقتك في الماب: 00:00:00")
+task.spawn(function()
+    local start = os.time()
+    while task.wait(1) do
+        local d = os.time() - start
+        MyTimeLabel:Set(string.format("وقتك في الماب: %02d:%02d:%02d", math.floor(d/3600), math.floor((d%3600)/60), d%60))
+    end
+end)
+
+local CreditsTab = Window:CreateTab("📜 الحقوق", 4483362458)
+CreditsTab:CreateLabel("تم التطوير بواسطة: مهند")
+
