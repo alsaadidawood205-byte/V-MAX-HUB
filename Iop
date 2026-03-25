@@ -1,0 +1,2262 @@
+--[[ KAHLAN HUB V7.9 | VORTEX EDITION 
+المطور: كحيلان
+المميزات: مص، اغتصاب، فلنق، تجسس، مستكشف الاغاني، الاجسام، Skybox، مضادات، تحسين الأداء، نسخ سكنات متقدم
+الواجهة: Rayfield UI Library 
+]] 
+
+-- ==========================================
+-- شاشة التحميل (Loading Screen)
+-- ==========================================
+local loadingScreen = Instance.new("ScreenGui")
+loadingScreen.Name = "KahlanLoadingScreen"
+loadingScreen.Parent = game:GetService("CoreGui")
+loadingScreen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+-- الخلفية الرئيسية
+local background = Instance.new("Frame")
+background.Size = UDim2.new(1, 0, 1, 0)
+background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+background.BackgroundTransparency = 0
+background.Parent = loadingScreen
+
+-- تأثير التلاشي للخلفية
+local backgroundFade = Instance.new("UIGradient")
+backgroundFade.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(20, 20, 30)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+})
+backgroundFade.Rotation = 90
+backgroundFade.Parent = background
+
+-- الإطار الزجاجي الرئيسي
+local glassFrame = Instance.new("Frame")
+glassFrame.Size = UDim2.new(0.6, 0, 0.5, 0)
+glassFrame.Position = UDim2.new(0.2, 0, 0.25, 0)
+glassFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+glassFrame.BackgroundTransparency = 0.2
+glassFrame.BorderSizePixel = 0
+glassFrame.Parent = loadingScreen
+
+-- تأثير الزجاج (Blur)
+local blurEffect = Instance.new("BlurEffect")
+blurEffect.Size = 15
+blurEffect.Parent = game:GetService("Lighting")
+
+-- إطار داخلي
+local innerFrame = Instance.new("Frame")
+innerFrame.Size = UDim2.new(0.95, 0, 0.9, 0)
+innerFrame.Position = UDim2.new(0.025, 0, 0.05, 0)
+innerFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+innerFrame.BackgroundTransparency = 0.5
+innerFrame.BorderSizePixel = 0
+innerFrame.Parent = glassFrame
+
+-- زوايا دائرية للإطار الخارجي
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 20)
+corner.Parent = glassFrame
+
+-- زوايا دائرية للإطار الداخلي
+local innerCorner = Instance.new("UICorner")
+innerCorner.CornerRadius = UDim.new(0, 15)
+innerCorner.Parent = innerFrame
+
+-- شعار KAHLAN HUB
+local logoText = Instance.new("TextLabel")
+logoText.Size = UDim2.new(1, 0, 0, 80)
+logoText.Position = UDim2.new(0, 0, 0, 20)
+logoText.BackgroundTransparency = 1
+logoText.Text = "🔥👹 KAHLAN HUB 👹🔥"
+logoText.TextColor3 = Color3.fromRGB(255, 100, 50)
+logoText.TextScaled = true
+logoText.Font = Enum.Font.GothamBlack
+logoText.TextStrokeTransparency = 0.3
+logoText.TextStrokeColor3 = Color3.fromRGB(255, 200, 0)
+logoText.Parent = innerFrame
+
+-- شعار المطور
+local devText = Instance.new("TextLabel")
+devText.Size = UDim2.new(1, 0, 0, 40)
+devText.Position = UDim2.new(0, 0, 0, 110)
+devText.BackgroundTransparency = 1
+devText.Text = "DEVELOPER: كحيلان"
+devText.TextColor3 = Color3.fromRGB(200, 200, 255)
+devText.TextScaled = true
+devText.Font = Enum.Font.GothamBold
+devText.TextTransparency = 0.3
+devText.Parent = innerFrame
+
+-- الإصدار
+local versionText = Instance.new("TextLabel")
+versionText.Size = UDim2.new(1, 0, 0, 30)
+versionText.Position = UDim2.new(0, 0, 0, 155)
+versionText.BackgroundTransparency = 1
+versionText.Text = "V7.9 | VORTEX EDITION"
+versionText.TextColor3 = Color3.fromRGB(150, 150, 200)
+versionText.TextScaled = true
+versionText.Font = Enum.Font.Gotham
+versionText.TextTransparency = 0.2
+versionText.Parent = innerFrame
+
+-- شريط التحميل (Progress Bar)
+local progressBarBg = Instance.new("Frame")
+progressBarBg.Size = UDim2.new(0.8, 0, 0, 30)
+progressBarBg.Position = UDim2.new(0.1, 0, 0.7, 0)
+progressBarBg.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+progressBarBg.BorderSizePixel = 0
+progressBarBg.Parent = innerFrame
+
+local progressBarBgCorner = Instance.new("UICorner")
+progressBarBgCorner.CornerRadius = UDim.new(0, 15)
+progressBarBgCorner.Parent = progressBarBg
+
+local progressBar = Instance.new("Frame")
+progressBar.Size = UDim2.new(0, 0, 1, 0)
+progressBar.BackgroundColor3 = Color3.fromRGB(255, 100, 50)
+progressBar.BorderSizePixel = 0
+progressBar.Parent = progressBarBg
+
+local progressBarCorner = Instance.new("UICorner")
+progressBarCorner.CornerRadius = UDim.new(0, 15)
+progressBarCorner.Parent = progressBar
+
+-- نسبة التحميل
+local percentText = Instance.new("TextLabel")
+percentText.Size = UDim2.new(1, 0, 0, 40)
+percentText.Position = UDim2.new(0, 0, 0.75, 0)
+percentText.BackgroundTransparency = 1
+percentText.Text = "0%"
+percentText.TextColor3 = Color3.fromRGB(255, 200, 100)
+percentText.TextScaled = true
+percentText.Font = Enum.Font.GothamBold
+percentText.Parent = innerFrame
+
+-- نص الحالة
+local statusText = Instance.new("TextLabel")
+statusText.Size = UDim2.new(1, 0, 0, 30)
+statusText.Position = UDim2.new(0, 0, 0.85, 0)
+statusText.BackgroundTransparency = 1
+statusText.Text = "جاري تحميل KAHLAN HUB..."
+statusText.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusText.TextScaled = true
+statusText.Font = Enum.Font.Gotham
+statusText.Parent = innerFrame
+
+-- نص حقوقي في الأسفل
+local copyrightText = Instance.new("TextLabel")
+copyrightText.Size = UDim2.new(1, 0, 0, 25)
+copyrightText.Position = UDim2.new(0, 0, 0.95, 0)
+copyrightText.BackgroundTransparency = 1
+copyrightText.Text = "© 2025 KAHLAN HUB | جميع الحقوق محفوظة"
+copyrightText.TextColor3 = Color3.fromRGB(100, 100, 150)
+copyrightText.TextScaled = true
+copyrightText.Font = Enum.Font.Gotham
+copyrightText.TextTransparency = 0.5
+copyrightText.Parent = innerFrame
+
+-- وظيفة تحديث شريط التحميل
+local function updateProgress(percent, status)
+    percent = math.clamp(percent, 0, 100)
+    progressBar.Size = UDim2.new(percent / 100, 0, 1, 0)
+    percentText.Text = math.floor(percent) .. "%"
+    statusText.Text = status or "جاري تحميل KAHLAN HUB..."
+end
+
+-- بدء تحميل السكربت مع شريط التحميل
+task.spawn(function()
+    -- مراحل التحميل
+    updateProgress(10, "جاري تهيئة البيئة...")
+    task.wait(0.3)
+    
+    updateProgress(25, "جاري تحميل Rayfield UI...")
+    task.wait(0.3)
+    
+    updateProgress(40, "جاري تحميل المميزات الرئيسية...")
+    task.wait(0.3)
+    
+    updateProgress(55, "جاري تحميل نظام المتعة...")
+    task.wait(0.3)
+    
+    updateProgress(70, "جاري تحميل أنظمة الحماية...")
+    task.wait(0.3)
+    
+    updateProgress(85, "جاري تحميل نظام السكربتات...")
+    task.wait(0.3)
+    
+    updateProgress(95, "جاري التجهيز النهائي...")
+    task.wait(0.3)
+    
+    updateProgress(100, "تم التحميل بنجاح!")
+    task.wait(0.5)
+end)
+
+-- ==========================================
+-- بدء السكربت الرئيسي بعد شاشة التحميل
+-- ==========================================
+task.delay(2.5, function()
+    -- إخفاء شاشة التحميل بتأثير جميل
+    for i = 1, 20 do
+        local transparency = i / 20
+        glassFrame.BackgroundTransparency = 0.2 + transparency * 0.8
+        innerFrame.BackgroundTransparency = 0.5 + transparency * 0.5
+        for _, child in pairs(innerFrame:GetChildren()) do
+            if child:IsA("TextLabel") then
+                child.TextTransparency = (child.TextTransparency or 0) + 0.05
+            end
+        end
+        background.BackgroundTransparency = transparency * 0.5
+        task.wait(0.05)
+    end
+    
+    -- حذف شاشة التحميل وإزالة تأثير البلور
+    loadingScreen:Destroy()
+    blurEffect:Destroy()
+end)
+
+-- [ تحميل Rayfield ]
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "🔥👹 KAHLAN HUB V7.9 | VORTEX EDITION 👹🔥",
+    LoadingTitle = "KAHLAN HUB - Dev Edition",
+    LoadingSubtitle = "by كحيلان",
+    ConfigurationSaving = { Enabled = true, FolderName = "KahlanHub", FileName = "KahlanConfig" }
+})
+
+-- [ تغيير اسم RP ]
+pcall(function()
+    local RE = ReplicatedStorage:WaitForChild("RE", 2)
+    if RE then
+        local NameTextEvent = RE:WaitForChild("1RPNam1eTex1t", 2)
+        local NameColorEvent = RE:WaitForChild("1RPNam1eColo1r", 2)
+        local function fireEvent(event, ...)
+            if event then event:FireServer(...) end
+        end
+        fireEvent(NameTextEvent, "RolePlayName", "كحيلان | KAHLAN")
+        fireEvent(NameTextEvent, "RolePlayBio", "DEVELOPER - KAHLAN")
+        task.spawn(function()
+            local hue = 0
+            while true do
+                hue = (hue + 0.01) % 1
+                local color = Color3.fromHSV(hue, 1, 1)
+                pcall(function()
+                    fireEvent(NameColorEvent, "PickingRPNameColor", color)
+                    fireEvent(NameColorEvent, "PickingRPBioColor", color)
+                end)
+                task.wait(0.05)
+            end
+        end)
+    end
+end)
+
+-- ═══════════════════════════════════════
+-- المتغيرات العامة
+-- ═══════════════════════════════════════
+local foundPlayer = nil
+local faceSitEnabled = false
+local bangEnabled = false
+local bangTarget = nil
+local spyEnabled = false
+local spyTarget = nil
+local originalCameraSubject = nil
+local autoSpyEnabled = false
+
+-- متغيرات البانق V2
+local TargetBangV2Enabled = false
+local FaceBangV2Enabled = false
+local TargetBangV2Connection = nil
+local FaceBangV2Connection = nil
+local BangOriginalPos = nil
+local combinedEnabled = false
+local holdSixTools = false
+
+-- متغيرات Skybox (Nuke FlashBack)
+local nukeFlashEnabled = false
+local savedNukeFlashBody = {}
+local nukeFlashTrack = nil
+local flashRigidTrack = nil
+
+-- متغيرات مضاد البانق
+local antiBangActive = false
+local antiBangGUI = nil
+local antiBangBtn = nil
+local antiBangToggle = false
+local antiBangLastPos = nil
+local antiBangVelConn = nil
+local antiBangHrp = nil
+
+-- ═══════════════════════════════════════
+-- الوظائف المساعدة
+-- ═══════════════════════════════════════
+local function resetVel()
+    pcall(function()
+        if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = lp.Character.HumanoidRootPart
+            hrp.Velocity = Vector3.zero
+            hrp.AssemblyLinearVelocity = Vector3.zero
+            hrp.AssemblyAngularVelocity = Vector3.zero
+            if lp.Character:FindFirstChild("Humanoid") then
+                lp.Character.Humanoid.Sit = false
+            end
+        end
+    end)
+end
+
+local function GetPlayerMatch(String)
+    for _, v in pairs(Players:GetPlayers()) do
+        if v.Name:lower():sub(1, #String) == String:lower() or v.DisplayName:lower():sub(1, #String) == String:lower() then
+            return v
+        end
+    end
+    return nil
+end
+
+local function EquipSixSimultaneously()
+    pcall(function()
+        local tools = {"Couch", "SkateBoard", "PremiumSkate", "MilitaryBoat", "JetPack", "Glider"}
+        for i, toolName in ipairs(tools) do
+            local args = {[1] = "PickingTools", [2] = toolName}
+            pcall(function()
+                return game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
+            end)
+            task.wait(0.3)
+        end
+        Rayfield:Notify({Title = "6 أدوات", Content = "تم تجهيز جميع الأدوات!", Duration = 3})
+    end)
+end
+
+-- وظائف Skybox
+local function stopFlashAnimations()
+    if nukeFlashTrack then
+        pcall(function() nukeFlashTrack:Stop() end)
+        nukeFlashTrack = nil
+    end
+    if flashRigidTrack then
+        pcall(function() flashRigidTrack:Stop() end)
+        flashRigidTrack = nil
+    end
+end
+
+-- وظيفة الشاشة الزجاجية
+local function ShowGlassNotification(message, duration)
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "KahlanNotification"
+    screenGui.Parent = game:GetService("CoreGui")
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0.8, 0, 0.4, 0)
+    frame.Position = UDim2.new(0.1, 0, 0.3, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    frame.BackgroundTransparency = 0.3
+    frame.BorderSizePixel = 0
+    frame.Parent = screenGui
+    
+    local blur = Instance.new("BlurEffect")
+    blur.Size = 10
+    blur.Parent = Lighting
+    
+    local innerFrame = Instance.new("Frame")
+    innerFrame.Size = UDim2.new(0.95, 0, 0.8, 0)
+    innerFrame.Position = UDim2.new(0.025, 0, 0.1, 0)
+    innerFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    innerFrame.BackgroundTransparency = 0.6
+    innerFrame.BorderSizePixel = 0
+    innerFrame.Parent = frame
+    
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = message
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textLabel.TextScaled = true
+    textLabel.Font = Enum.Font.GothamBold
+    textLabel.TextWrapped = true
+    textLabel.Parent = innerFrame
+    
+    local borderFrame = Instance.new("Frame")
+    borderFrame.Size = UDim2.new(1, 0, 1, 0)
+    borderFrame.BackgroundTransparency = 1
+    borderFrame.BorderSizePixel = 2
+    borderFrame.BorderColor3 = Color3.fromRGB(0, 255, 200)
+    borderFrame.Parent = frame
+    
+    frame.BackgroundTransparency = 0.5
+    frame.Size = UDim2.new(0.7, 0, 0.3, 0)
+    frame.Position = UDim2.new(0.15, 0, 0.35, 0)
+    
+    task.wait(duration)
+    
+    for i = 1, 10 do
+        frame.BackgroundTransparency = frame.BackgroundTransparency + 0.05
+        innerFrame.BackgroundTransparency = innerFrame.BackgroundTransparency + 0.05
+        textLabel.TextTransparency = textLabel.TextTransparency + 0.1
+        task.wait(0.05)
+    end
+    
+    screenGui:Destroy()
+    blur:Destroy()
+end
+
+-- ═══════════════════════════════════════
+-- محرك المص/الاغتصاب
+-- ═══════════════════════════════════════
+RunService.Heartbeat:Connect(function()
+    pcall(function()
+        if (faceSitEnabled or bangEnabled) and bangTarget and bangTarget.Character then
+            local targetChar = bangTarget.Character
+            if not targetChar:FindFirstChild("HumanoidRootPart") then return end
+            if not lp.Character or not lp.Character:FindFirstChild("HumanoidRootPart") then return end
+            
+            local hrp = lp.Character.HumanoidRootPart
+            local move = math.sin(tick() * 150) * 1.5
+            hrp.Velocity = Vector3.zero
+            
+            if faceSitEnabled and targetChar:FindFirstChild("Head") then
+                lp.Character.Humanoid.Sit = true
+                hrp.CFrame = targetChar.Head.CFrame * CFrame.new(0, 0.2, -0.5 + move) * CFrame.Angles(0, math.rad(180), 0)
+            elseif bangEnabled then
+                lp.Character.Humanoid.Sit = false
+                hrp.CFrame = targetChar.HumanoidRootPart.CFrame * CFrame.new(0, 0.5, 1.1 + move)
+            end
+        end
+    end)
+end)
+
+-- ═══════════════════════════════════════
+-- وظائف التجسس
+-- ═══════════════════════════════════════
+local function stopSpy()
+    if not spyEnabled then return end
+    spyEnabled = false
+    pcall(function()
+        local camera = Workspace.CurrentCamera
+        if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+            camera.CameraSubject = lp.Character.Humanoid
+        elseif originalCameraSubject then
+            camera.CameraSubject = originalCameraSubject
+        end
+    end)
+    spyTarget = nil
+    Rayfield:Notify({ Title = "تجسس", Content = "تم إيقاف التجسس", Duration = 3 })
+end
+
+local function startSpy(target)
+    if not target then
+        Rayfield:Notify({ Title = "خطأ", Content = "الهدف غير موجود!", Duration = 3 })
+        return
+    end
+    if not target.Character or not target.Character:FindFirstChild("Humanoid") then
+        Rayfield:Notify({ Title = "خطأ", Content = "شخصية الهدف غير موجودة!", Duration = 3 })
+        return
+    end
+    spyEnabled = true
+    spyTarget = target
+    pcall(function()
+        local camera = Workspace.CurrentCamera
+        originalCameraSubject = camera.CameraSubject
+        camera.CameraSubject = target.Character.Humanoid
+        Rayfield:Notify({ Title = "تجسس", Content = "بدأ التجسس على: " .. target.Name, Duration = 3 })
+    end)
+end
+
+-- ═══════════════════════════════════════
+-- التبويبات
+-- ═══════════════════════════════════════
+
+-- تبويب المتعة
+local FunTab = Window:CreateTab(" المتعة", 4483362458)
+
+FunTab:CreateSection("نظام السحب العميق (Deep Recoil 1,000,000)")
+
+FunTab:CreateInput({ 
+    Name = "اسم الهدف", 
+    PlaceholderText = "البحث من اليسار...", 
+    Callback = function(Text) 
+        bangTarget = GetPlayerMatch(Text) 
+        if bangTarget then 
+            Rayfield:Notify({Title = "رادار", Content = "تم قفل الهدف: " .. bangTarget.DisplayName, Duration = 3}) 
+        end 
+    end 
+})
+
+FunTab:CreateToggle({ 
+    Name = "وضع الدمج 🌀", 
+    CurrentValue = false, 
+    Callback = function(v) 
+        combinedEnabled = v
+        holdSixTools = false 
+        if v then 
+            bangEnabled = false
+            faceSitEnabled = false 
+        end 
+    end 
+})
+
+FunTab:CreateToggle({ 
+    Name = "بانق خلفي 🍑", 
+    CurrentValue = false, 
+    Callback = function(v) 
+        bangEnabled = v
+        holdSixTools = false 
+        if v then 
+            combinedEnabled = false
+            faceSitEnabled = false 
+        end 
+    end 
+})
+
+FunTab:CreateToggle({ 
+    Name = "فيس سيت 👅", 
+    CurrentValue = false, 
+    Callback = function(v) 
+        faceSitEnabled = v
+        holdSixTools = false 
+        if v then 
+            combinedEnabled = false
+            bangEnabled = false 
+        end 
+    end 
+})
+
+FunTab:CreateSection("🛠️ هجوم الـ 6 أدوات معاً 🛠️")
+
+FunTab:CreateToggle({ 
+    Name = "وضع الدمج (6 أدوات) 🌀", 
+    CurrentValue = false, 
+    Callback = function(v) 
+        combinedEnabled = v
+        holdSixTools = v 
+        if v then 
+            bangEnabled = false
+            faceSitEnabled = false 
+        end 
+    end 
+})
+
+FunTab:CreateToggle({ 
+    Name = "بانق خلفي (6 أدوات) 🍑", 
+    CurrentValue = false, 
+    Callback = function(v) 
+        bangEnabled = v
+        holdSixTools = v 
+        if v then 
+            combinedEnabled = false
+            faceSitEnabled = false 
+        end 
+    end 
+})
+
+FunTab:CreateToggle({ 
+    Name = "فيس سيت (6 أدوات) 👅", 
+    CurrentValue = false, 
+    Callback = function(v) 
+        faceSitEnabled = v
+        holdSixTools = v 
+        if v then 
+            combinedEnabled = false
+            bangEnabled = false 
+        end 
+    end 
+})
+
+FunTab:CreateButton({ 
+    Name = "اجمع 6 مع بعض ⚔️", 
+    Callback = function() 
+        EquipSixSimultaneously() 
+        Rayfield:Notify({Title = "جاهز", Content = "تم تجهيز 6 أدوات للهجوم!", Duration = 3}) 
+    end 
+})
+
+FunTab:CreateSection("⚠️ أنظمة البانق V2 الجديدة (استهداف مباشر) ⚠️")
+
+FunTab:CreateToggle({ 
+    Name = "تفعيل بانق v2 كل الجسد 💥", 
+    CurrentValue = false, 
+    Callback = function(Value)
+        TargetBangV2Enabled = Value
+        local char = lp.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        
+        if TargetBangV2Enabled then
+            if not bangTarget or not bangTarget.Character then 
+                TargetBangV2Enabled = false
+                Rayfield:Notify({Title = "خطأ", Content = "لا يوجد هدف محدد!", Duration = 3})
+                return 
+            end
+            BangOriginalPos = hrp.CFrame 
+            hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+            
+            TargetBangV2Connection = RunService.Heartbeat:Connect(function()
+                if not TargetBangV2Enabled or not bangTarget.Character then return end
+                local targetParts = {}
+                for _, p in pairs(bangTarget.Character:GetChildren()) do 
+                    if p:IsA("BasePart") then 
+                        table.insert(targetParts, p) 
+                    end 
+                end
+                local randomPart = targetParts[math.random(1, #targetParts)]
+                if not randomPart then return end
+                
+                for _, part in pairs(char:GetChildren()) do 
+                    if part:IsA("BasePart") then 
+                        part.CanCollide = false 
+                    end 
+                end
+                
+                hrp.CFrame = randomPart.CFrame * CFrame.new(Vector3.new(math.random(-1,1), math.random(-1,1), math.random(-1,1))) * CFrame.Angles(math.rad(math.random(0,360)), math.rad(math.random(0,360)), math.rad(math.random(0,360)))
+                hrp.Velocity = Vector3.new(20000, 20000, 20000)
+                hrp.RotVelocity = Vector3.new(50000, 50000, 50000)
+            end)
+        else
+            if TargetBangV2Connection then TargetBangV2Connection:Disconnect() end
+            if hum then 
+                hum:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+                hum.Sit = false 
+            end
+            if hrp then 
+                hrp.Velocity = Vector3.new(0,0,0)
+                hrp.RotVelocity = Vector3.new(0,0,0)
+                if BangOriginalPos then 
+                    hrp.CFrame = BangOriginalPos 
+                end 
+            end
+            if char then 
+                for _, part in pairs(char:GetChildren()) do 
+                    if part:IsA("BasePart") then 
+                        part.CanCollide = true 
+                    end 
+                end 
+            end
+        end
+    end
+})
+
+FunTab:CreateToggle({ 
+    Name = "تفعيل بانق v2 للوجه 😈", 
+    CurrentValue = false, 
+    Callback = function(Value)
+        FaceBangV2Enabled = Value
+        local char = lp.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        
+        if FaceBangV2Enabled then
+            if not bangTarget or not bangTarget.Character or not bangTarget.Character:FindFirstChild("Head") then 
+                FaceBangV2Enabled = false
+                Rayfield:Notify({Title = "خطأ", Content = "لا يوجد هدف أو الرأس غير موجود!", Duration = 3})
+                return 
+            end
+            BangOriginalPos = hrp.CFrame 
+            hum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+            
+            FaceBangV2Connection = RunService.Heartbeat:Connect(function()
+                if not FaceBangV2Enabled or not bangTarget.Character or not bangTarget.Character:FindFirstChild("Head") then return end
+                
+                for _, part in pairs(char:GetChildren()) do 
+                    if part:IsA("BasePart") then 
+                        part.CanCollide = false 
+                    end 
+                end
+                
+                hum.Sit = math.random() > 0.5 
+                hrp.CFrame = bangTarget.Character.Head.CFrame * CFrame.Angles(math.rad(math.random(0,360)), math.rad(math.random(0,360)), math.rad(math.random(0,360)))
+                hrp.Velocity = Vector3.new(30000, 30000, 30000)
+                hrp.RotVelocity = Vector3.new(50000, 50000, 50000)
+            end)
+        else
+            if FaceBangV2Connection then FaceBangV2Connection:Disconnect() end
+            if hum then 
+                hum:SetStateEnabled(Enum.HumanoidStateType.Dead, true)
+                hum.Sit = false 
+            end
+            if hrp then 
+                hrp.Velocity = Vector3.new(0,0,0)
+                hrp.RotVelocity = Vector3.new(0,0,0)
+                if BangOriginalPos then 
+                    hrp.CFrame = BangOriginalPos 
+                end 
+            end
+            if char then 
+                for _, part in pairs(char:GetChildren()) do 
+                    if part:IsA("BasePart") then 
+                        part.CanCollide = true 
+                    end 
+                end 
+            end
+        end
+    end
+})
+
+-- تبويب الفلنق
+local FlingTab = Window:CreateTab(" الفلنق", 4483362458)
+
+FlingTab:CreateSection("فلنق بالكنبة")
+
+FlingTab:CreateButton({
+    Name = "اخذ الكنبة",
+    Callback = function()
+        pcall(function()
+            local args = {[1] = "PickingTools", [2] = "Couch"}
+            game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
+        end)
+        Rayfield:Notify({ Title = "الفلنق", Content = "تم اخذ الكنبة!", Duration = 3 })
+    end
+})
+
+local selectedFlingPlayer = nil
+local flingLoopActive = false
+local savedOriginalCFrame = nil
+
+FlingTab:CreateInput({
+    Name = "اكتب اسم الضحية",
+    PlaceholderText = "اكتب الاسم هنا...",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(text)
+        local searchText = text:lower()
+        if #searchText >= 1 then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Name:lower():find(searchText) and p ~= lp then
+                    selectedFlingPlayer = p
+                    Rayfield:Notify({ Title = "الفلنق", Content = "تم تحديد: " .. p.Name, Duration = 3 })
+                    return
+                end
+            end
+            Rayfield:Notify({ Title = "خطأ", Content = "اللاعب مو موجود!", Duration = 3 })
+        end
+        selectedFlingPlayer = nil
+    end
+})
+
+FlingTab:CreateToggle({
+    Name = "قتل اللاعب بالكنبة",
+    CurrentValue = false,
+    Callback = function(state)
+        if state then
+            if not selectedFlingPlayer then
+                Rayfield:Notify({ Title = "خطأ", Content = "اختر لاعب اولاً!", Duration = 3 })
+                return
+            end
+            
+            local lplayer = Players.LocalPlayer
+            local character = lplayer.Character
+            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+            local rootPart = humanoid and humanoid.RootPart
+            
+            if not rootPart then
+                Rayfield:Notify({ Title = "خطأ", Content = "لا يمكن العثور على الشخصية!", Duration = 3 })
+                return
+            end
+            
+            savedOriginalCFrame = rootPart.CFrame
+            
+            local function isItemInInventory(itemName)
+                for _, item in pairs(lplayer.Backpack:GetChildren()) do
+                    if item.Name == itemName then
+                        return true
+                    end
+                end
+                return false
+            end
+            
+            local function equipItem(itemName)
+                local item = lplayer.Backpack:FindFirstChild(itemName)
+                if item then
+                    lplayer.Character.Humanoid:EquipTool(item)
+                end
+            end
+            
+            local function unequipItem(itemName)
+                local item = lplayer.Character:FindFirstChild(itemName)
+                if item then
+                    item.Parent = lplayer.Backpack
+                end
+            end
+            
+            if not isItemInInventory("Couch") then
+                local args = {[1] = "PickingTools", [2] = "Couch"}
+                game:GetService("ReplicatedStorage").RE:FindFirstChild("1Too1l"):InvokeServer(unpack(args))
+            end
+            equipItem("Couch")
+            flingLoopActive = true
+            
+            task.spawn(function()
+                local startTime = tick()
+                local flingDuration = 5
+                local oldPos = rootPart.CFrame
+                local target = selectedFlingPlayer
+                
+                while flingLoopActive and tick() - startTime < flingDuration do
+                    pcall(function()
+                        if not target or not target.Character then 
+                            flingLoopActive = false
+                            return 
+                        end
+                        
+                        local char = lplayer.Character
+                        local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+                        local rootPart = humanoid and humanoid.RootPart
+                        local tChar = target.Character
+                        local tHumanoid = tChar:FindFirstChildOfClass("Humanoid")
+                        local tRoot = tHumanoid and tHumanoid.RootPart
+                        
+                        if not rootPart or not tRoot then 
+                            flingLoopActive = false
+                            return 
+                        end
+                        
+                        if rootPart.Velocity.Magnitude < 50 then
+                            oldPos = rootPart.CFrame
+                        end
+                        
+                        if tHumanoid and tHumanoid.Sit then
+                            unequipItem("Couch")
+                            flingLoopActive = false
+                            return
+                        end
+                        
+                        workspace.FallenPartsDestroyHeight = -999999999
+                        
+                        local BV = Instance.new("BodyVelocity")
+                        BV.Name = "FlingVelocity"
+                        BV.Parent = rootPart
+                        BV.Velocity = Vector3.new(9e8, 9e8, 9e8)
+                        BV.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                        
+                        humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+                        
+                        local angle = 0
+                        local loopStart = tick()
+                        while flingLoopActive and tick() - loopStart < 2 and tick() - startTime < flingDuration do
+                            angle = angle + 100
+                            local newCFrame = tRoot.CFrame * CFrame.new(0, 1.5, 0) * CFrame.Angles(math.rad(angle), 0, 0)
+                            rootPart.CFrame = newCFrame
+                            char:SetPrimaryPartCFrame(newCFrame)
+                            rootPart.Velocity = Vector3.new(9e7, 9e7 * 10, 9e7)
+                            rootPart.RotVelocity = Vector3.new(50000, 50000, 50000)
+                            task.wait()
+                        end
+                        
+                        BV:Destroy()
+                    end)
+                    task.wait()
+                end
+                
+                flingLoopActive = false
+                
+                pcall(function()
+                    local char = lplayer.Character
+                    local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+                    local rootPart = humanoid and humanoid.RootPart
+                    
+                    if humanoid then
+                        humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+                        humanoid.Sit = false
+                        humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+                    end
+                    
+                    if rootPart then
+                        rootPart.Velocity = Vector3.zero
+                        rootPart.AssemblyLinearVelocity = Vector3.zero
+                        rootPart.AssemblyAngularVelocity = Vector3.zero
+                        rootPart.RotVelocity = Vector3.zero
+                        
+                        if savedOriginalCFrame then
+                            rootPart.CFrame = savedOriginalCFrame
+                        end
+                    end
+                    
+                    if char then
+                        for _, part in pairs(char:GetChildren()) do
+                            if part:IsA("BasePart") then
+                                part.CanCollide = true
+                            end
+                        end
+                    end
+                    
+                    workspace.FallenPartsDestroyHeight = -999999999
+                    unequipItem("Couch")
+                    
+                    Rayfield:Notify({ Title = "الفلنق", Content = "تم إيقاف الفلنق والعودة للموقع الطبيعي!", Duration = 3 })
+                end)
+            end)
+            
+            Rayfield:Notify({ Title = "الفلنق", Content = "بدأ الفلنق على: " .. selectedFlingPlayer.Name .. " لمدة 5 ثواني", Duration = 3 })
+        else
+            flingLoopActive = false
+            
+            pcall(function()
+                local lplayer = Players.LocalPlayer
+                local char = lplayer.Character
+                local humanoid = char and char:FindFirstChildOfClass("Humanoid")
+                local rootPart = humanoid and humanoid.RootPart
+                
+                if humanoid then
+                    humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+                    humanoid.Sit = false
+                    humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+                end
+                
+                if rootPart then
+                    rootPart.Velocity = Vector3.zero
+                    rootPart.AssemblyLinearVelocity = Vector3.zero
+                    rootPart.AssemblyAngularVelocity = Vector3.zero
+                    rootPart.RotVelocity = Vector3.zero
+                    
+                    if savedOriginalCFrame then
+                        rootPart.CFrame = savedOriginalCFrame
+                    end
+                end
+                
+                if char then
+                    for _, part in pairs(char:GetChildren()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = true
+                        end
+                    end
+                end
+                
+                local function unequipItem(itemName)
+                    local item = lplayer.Character:FindFirstChild(itemName)
+                    if item then
+                        item.Parent = lplayer.Backpack
+                    end
+                end
+                unequipItem("Couch")
+                
+                Rayfield:Notify({ Title = "الفلنق", Content = "تم إيقاف الفلنق فوراً!", Duration = 3 })
+            end)
+        end
+    end
+})
+
+FlingTab:CreateSection("فلنق GUI")
+
+FlingTab:CreateButton({
+    Name = "سكربت فلنق GUI",
+    Callback = function()
+        Rayfield:Notify({ Title = "الفلنق", Content = "جاري تحميل الفلنق...", Duration = 3 })
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/0Ben1/fe./main/Fling%20GUI"))()
+    end
+})
+
+-- تبويب التجسس
+local SpyTab = Window:CreateTab(" التجسس", 4483362458)
+
+SpyTab:CreateToggle({
+    Name = "تجسس على الهدف المحدد",
+    CurrentValue = false,
+    Callback = function(value)
+        if value then
+            if foundPlayer then
+                startSpy(foundPlayer)
+            else
+                Rayfield:Notify({ Title = "خطأ", Content = "اختر هدفاً أولاً!", Duration = 3 })
+            end
+        else
+            stopSpy()
+        end
+    end,
+})
+
+local SpyInput = SpyTab:CreateInput({
+    Name = "تجسس مباشر",
+    PlaceholderText = "اكتب اسم اللاعب...",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(text)
+        local searchText = text:lower()
+        if #searchText >= 1 then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Name:lower():find(searchText) and p ~= lp then
+                    startSpy(p)
+                    return
+                end
+            end
+            Rayfield:Notify({ Title = "خطأ", Content = "لم يتم العثور على اللاعب!", Duration = 3 })
+        end
+    end,
+})
+
+SpyTab:CreateButton({
+    Name = " إيقاف التجسس",
+    Callback = function()
+        stopSpy()
+    end,
+})
+
+SpyTab:CreateToggle({
+    Name = " تجسس تلقائي (تناوب)",
+    CurrentValue = false,
+    Callback = function(value)
+        autoSpyEnabled = value
+        if value then
+            task.spawn(function()
+                while autoSpyEnabled do
+                    local allPlayers = Players:GetPlayers()
+                    for _, player in pairs(allPlayers) do
+                        if not autoSpyEnabled then break end
+                        if player ~= lp and player.Character then
+                            startSpy(player)
+                            task.wait(5)
+                        end
+                    end
+                    if autoSpyEnabled then
+                        task.wait(1)
+                    end
+                end
+                stopSpy()
+            end)
+        else
+            stopSpy()
+        end
+    end,
+})
+
+-- ═══════════════════════════════════════
+-- تبويب الحماية
+-- ═══════════════════════════════════════
+local ProtectTab = Window:CreateTab("الحماية", 4483362458)
+
+-- قسم تحسين الأداء
+ProtectTab:CreateSection("⚡ تحسين الأداء ⚡")
+
+ProtectTab:CreateButton({
+    Name = "🔧 تخفيف الجودة (Anti-Lag) 🔧",
+    Callback = function()
+        ShowGlassNotification("تم تقليل الجودة من قبل كحيلان\nجاري تحسين الأداء...", 5)
+        
+        pcall(function()
+            Lighting.GlobalShadows = false
+            Lighting.FogEnd = 100
+            Lighting.OutdoorAmbient = Color3.new(0.5, 0.5, 0.5)
+            
+            for _, effect in pairs(Lighting:GetChildren()) do
+                if effect:IsA("BloomEffect") or effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") or effect:IsA("ColorCorrectionEffect") then
+                    effect:Enabled = false
+                end
+            end
+            
+            Workspace.Terrain.WaterWaveSize = 0
+            Workspace.Terrain.WaterReflectance = 0
+            Workspace.Terrain.WaterTransparency = 1
+            
+            UserSettings().Physics.AllowSleep = true
+            UserSettings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Disabled
+            
+            for _, part in pairs(Workspace:GetDescendants()) do
+                if part:IsA("BasePart") and part:IsDescendantOf(Workspace) then
+                    if part.Position.Magnitude > 500 then
+                        part.Transparency = 0.8
+                    end
+                end
+            end
+            
+            Rayfield:Notify({ Title = "كحيلان | تحسين الأداء", Content = "تم تقليل الجودة لتحسين الأداء!", Duration = 4 })
+        end)
+    end
+})
+
+ProtectTab:CreateButton({
+    Name = "🔧 استعادة الجودة الأصلية 🔧",
+    Callback = function()
+        pcall(function()
+            Lighting.GlobalShadows = true
+            Lighting.FogEnd = 100000
+            Lighting.OutdoorAmbient = Color3.new(0.5, 0.5, 0.5)
+            
+            for _, effect in pairs(Lighting:GetChildren()) do
+                if effect:IsA("BloomEffect") or effect:IsA("BlurEffect") or effect:IsA("SunRaysEffect") or effect:IsA("ColorCorrectionEffect") then
+                    effect:Enabled = true
+                end
+            end
+            
+            Workspace.Terrain.WaterWaveSize = 5
+            Workspace.Terrain.WaterReflectance = 0.5
+            Workspace.Terrain.WaterTransparency = 0.5
+            
+            for _, part in pairs(Workspace:GetDescendants()) do
+                if part:IsA("BasePart") and part.Transparency == 0.8 then
+                    part.Transparency = 0
+                end
+            end
+            
+            Rayfield:Notify({ Title = "كحيلان | استعادة الجودة", Content = "تم استعادة الجودة الأصلية!", Duration = 4 })
+        end)
+    end
+})
+
+-- قسم مضادات البانق
+ProtectTab:CreateSection("🛡️ مضادات البانق والفلنق 🛡️")
+
+ProtectTab:CreateToggle({
+    Name = "🛡️ مضاد البانق (Anti-Bang) 🛡️",
+    CurrentValue = false,
+    Callback = function(value)
+        if value then
+            local TeleportTime = 0.1
+            local targetPos = Vector3.new(905, -500, 0)
+            local localPlayer = lp
+            antiBangActive = true
+            antiBangToggle = false
+            
+            local function resetCameraSubject()
+                if Workspace.CurrentCamera and localPlayer.Character then
+                    local humanoid = localPlayer.Character:FindFirstChildWhichIsA("Humanoid")
+                    if humanoid then
+                        Workspace.CurrentCamera.CameraSubject = humanoid
+                    end
+                end
+            end
+            
+            local function createTween(targetCFrame)
+                local tweenInfo = TweenInfo.new(TeleportTime, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                return TweenService:Create(antiBangHrp, tweenInfo, {CFrame = targetCFrame})
+            end
+            
+            local function startVelLoop()
+                antiBangVelConn = RunService.Heartbeat:Connect(function()
+                    if antiBangToggle and antiBangHrp then
+                        antiBangHrp.Velocity = Vector3.new(0, 0, 0)
+                    end
+                end)
+            end
+            
+            local function stopVelLoop()
+                if antiBangVelConn then
+                    antiBangVelConn:Disconnect()
+                    antiBangVelConn = nil
+                end
+            end
+            
+            local function toggleTween()
+                if not antiBangHrp then return end
+                if antiBangToggle then
+                    antiBangToggle = false
+                    if antiBangBtn then
+                        antiBangBtn.Text = "🛡️ ANTI-BANG OFF"
+                        antiBangBtn.BackgroundColor3 = Color3.new(1, 0, 0)
+                    end
+                    stopVelLoop()
+                    if antiBangLastPos then
+                        local tweenBack = createTween(CFrame.new(antiBangLastPos))
+                        tweenBack:Play()
+                        tweenBack.Completed:Wait()
+                    end
+                    Workspace.FallenPartsDestroyHeight = -500
+                    resetCameraSubject()
+                    if Workspace:FindFirstChild("Gaze") then
+                        Workspace.Gaze:Destroy()
+                    end
+                else
+                    if antiBangHrp then
+                        antiBangLastPos = antiBangHrp.Position
+                        local part = Instance.new("Part")
+                        part.Size = Vector3.new(4, 1, 4)
+                        part.Position = antiBangLastPos
+                        part.Anchored = true
+                        part.CanCollide = false
+                        part.Transparency = 0.5
+                        part.Name = "Gaze"
+                        part.Parent = Workspace
+                        Workspace.CurrentCamera.CameraSubject = part
+                        antiBangToggle = true
+                        if antiBangBtn then
+                            antiBangBtn.Text = "🛡️ ANTI-BANG ON"
+                            antiBangBtn.BackgroundColor3 = Color3.new(0, 1, 0)
+                        end
+                        
+                        task.wait()
+                        Workspace.FallenPartsDestroyHeight = -1000
+                        local tweenToTarget = createTween(CFrame.new(targetPos))
+                        tweenToTarget:Play()
+                        tweenToTarget.Completed:Wait()
+                        startVelLoop()
+                    end
+                end
+            end
+            
+            local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+            antiBangHrp = character:WaitForChild("HumanoidRootPart")
+            
+            antiBangGUI = Instance.new("ScreenGui")
+            antiBangGUI.Name = "AntiBangGUI"
+            antiBangGUI.Parent = localPlayer:WaitForChild("PlayerGui")
+            
+            antiBangBtn = Instance.new("TextButton")
+            antiBangBtn.Size = UDim2.new(0, 140, 0, 40)
+            antiBangBtn.Position = UDim2.new(0.02, 0, 0.02, 0)
+            antiBangBtn.Text = "🛡️ ANTI-BANG OFF"
+            antiBangBtn.BackgroundColor3 = Color3.new(1, 0, 0)
+            antiBangBtn.TextColor3 = Color3.new(1, 1, 1)
+            antiBangBtn.Font = Enum.Font.GothamBold
+            antiBangBtn.TextSize = 14
+            antiBangBtn.Draggable = true
+            antiBangBtn.Parent = antiBangGUI
+            
+            antiBangBtn.MouseButton1Click:Connect(function()
+                toggleTween()
+            end)
+            
+            Rayfield:Notify({ Title = "كحيلان | مضاد البانق", Content = "تم تفعيل مضاد البانق! زر التحكم ظهر في أعلى يسار الشاشة", Duration = 5 })
+        else
+            if antiBangActive then
+                if antiBangToggle then
+                    if antiBangBtn then
+                        antiBangBtn.Text = "🛡️ ANTI-BANG OFF"
+                        antiBangBtn.BackgroundColor3 = Color3.new(1, 0, 0)
+                    end
+                    antiBangToggle = false
+                    
+                    if antiBangVelConn then
+                        antiBangVelConn:Disconnect()
+                        antiBangVelConn = nil
+                    end
+                    
+                    if antiBangLastPos and antiBangHrp then
+                        local tweenBack = TweenService:Create(antiBangHrp, TweenInfo.new(0.1, Enum.EasingStyle.Linear), {CFrame = CFrame.new(antiBangLastPos)})
+                        tweenBack:Play()
+                        tweenBack.Completed:Wait()
+                    end
+                    
+                    Workspace.FallenPartsDestroyHeight = -500
+                    
+                    if Workspace:FindFirstChild("Gaze") then
+                        Workspace.Gaze:Destroy()
+                    end
+                    
+                    if lp.Character and lp.Character:FindFirstChildOfClass("Humanoid") then
+                        Workspace.CurrentCamera.CameraSubject = lp.Character:FindFirstChildOfClass("Humanoid")
+                    end
+                end
+                
+                if antiBangGUI then
+                    antiBangGUI:Destroy()
+                    antiBangGUI = nil
+                end
+                
+                antiBangActive = false
+                antiBangBtn = nil
+                antiBangHrp = nil
+                
+                Rayfield:Notify({ Title = "كحيلان | مضاد البانق", Content = "تم إيقاف مضاد البانق!", Duration = 4 })
+            end
+        end
+    end
+})
+
+-- الحماية الموجودة مسبقاً
+ProtectTab:CreateSection("حماية من الجلوس")
+
+local enabled = false
+local seats = {}
+local setEnabled
+
+ProtectTab:CreateToggle({
+    Name = "حماية جلوس",
+    CurrentValue = false,
+    Callback = function(state)
+        seats = {}
+        for _, seat in next, Workspace:GetDescendants() do
+            if seat:IsA("Seat") then
+                seats[seat] = true
+            end
+        end
+        Workspace.DescendantAdded:Connect(function(seat)
+            if seat:IsA("Seat") then
+                seats[seat] = true
+                seat.Disabled = not enabled
+            end
+        end)
+        Workspace.DescendantRemoving:Connect(function(seat)
+            if seat:IsA("Seat") then
+                seats[seat] = nil
+            end
+        end)
+        setEnabled = function(newEnabled)
+            if newEnabled == enabled then return end
+            enabled = newEnabled
+            for seat, _ in next, seats do
+                seat.Disabled = not enabled
+            end
+        end
+        setEnabled(not state)
+        Rayfield:Notify({ Title = "الحماية", Content = state and "تم تفعيل حماية الجلوس!" or "تم ايقاف الحماية!", Duration = 3 })
+    end
+})
+
+ProtectTab:CreateSection("حماية من الفلنق")
+
+ProtectTab:CreateToggle({
+    Name = "حماية فلنق",
+    CurrentValue = false,
+    Callback = function(state)
+        if state then
+            Rayfield:Notify({ Title = "الحماية", Content = "جاري تحميل حماية الفلنق...", Duration = 3 })
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/NotAtomz/Atom-Scripts/refs/heads/main/anti%20fling"))()
+        end
+    end
+})
+
+ProtectTab:CreateSection("حماية من الرحمة والبانق")
+
+ProtectTab:CreateButton({
+    Name = "سكربت يطير اللي يفعلون عليك",
+    Callback = function()
+        Rayfield:Notify({ Title = "الحماية", Content = "جاري التحميل...", Duration = 3 })
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/zephyr10101/ignore-touchinterests/main/main", true))()
+    end
+})
+
+ProtectTab:CreateButton({
+    Name = "سكربت يقتل اللي يفعلون عليك",
+    Callback = function()
+        Rayfield:Notify({ Title = "الحماية", Content = "جاري التحميل...", Duration = 3 })
+        loadstring(game:HttpGet("https://scriptblox.com/raw/Universal-Script-FE-Fling-GUI-10927"))()
+    end
+})
+
+ProtectTab:CreateSection("Anti AFK")
+
+ProtectTab:CreateButton({
+    Name = "سكربت AntiAFK 1",
+    Callback = function()
+        Rayfield:Notify({ Title = "الحماية", Content = "جاري تفعيل AntiAFK...", Duration = 3 })
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/YallSumLs/Scripts/refs/heads/main/Anti-Afk"))()
+    end
+})
+
+ProtectTab:CreateButton({
+    Name = "سكربت AntiAFK 2",
+    Callback = function()
+        Rayfield:Notify({ Title = "الحماية", Content = "جاري تفعيل AntiAFK...", Duration = 3 })
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))()
+    end
+})
+
+ProtectTab:CreateButton({
+    Name = "سكربت AntiAFK 3",
+    Callback = function()
+        Rayfield:Notify({ Title = "الحماية", Content = "جاري تفعيل AntiAFK...", Duration = 3 })
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/ArgetnarYT/scripts/main/AntiAfk2.lua"))()
+    end
+})
+
+-- تبويب القتل
+local KillTab = Window:CreateTab("قتل", 4483362458)
+local killTarget = nil
+
+KillTab:CreateSection("قتل بالسفينة")
+
+KillTab:CreateInput({
+    Name = "اكتب اسم الضحية",
+    PlaceholderText = "اكتب الاسم هنا...",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(text)
+        local searchText = text:lower()
+        if #searchText >= 1 then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Name:lower():find(searchText) and p ~= lp then
+                    killTarget = p.Name
+                    Rayfield:Notify({ Title = "القتل", Content = "تم تحديد: " .. p.Name, Duration = 3 })
+                    return
+                end
+            end
+            Rayfield:Notify({ Title = "خطأ", Content = "اللاعب مو موجود!", Duration = 3 })
+        end
+        killTarget = nil
+    end
+})
+
+KillTab:CreateButton({
+    Name = "اقتل اللاعب بالسفينة",
+    Callback = function()
+        if not killTarget then
+            Rayfield:Notify({ Title = "خطأ", Content = "اكتب اسم الضحية اولاً!", Duration = 3 })
+            return
+        end
+        Rayfield:Notify({ Title = "القتل", Content = "جاري تنفيذ القتل...", Duration = 3 })
+        task.spawn(function()
+            pcall(function()
+                local player = Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local humanoid = character:WaitForChild("Humanoid")
+                local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+                local originalPosition = humanoidRootPart.Position
+                
+                humanoidRootPart.CFrame = CFrame.new(634.18, -4.00, 1839.65)
+                task.wait(0.5)
+                
+                local args = {"PickingBoat", "MilitaryBoatFree"}
+                game:GetService("ReplicatedStorage"):WaitForChild("RE"):WaitForChild("1Ca1r"):FireServer(unpack(args))
+                
+                local startTime = tick()
+                local seated = false
+                while tick() - startTime < 10 do
+                    local vehicle = Workspace.Vehicles:FindFirstChild(player.Name .. "Car")
+                    if vehicle then
+                        local vehicleSeat = vehicle:FindFirstChild("VehicleSeat") or (vehicle:FindFirstChild("Body") and vehicle.Body:FindFirstChild("VehicleSeat"))
+                        if vehicleSeat then
+                            humanoidRootPart.CFrame = vehicleSeat.CFrame * CFrame.new(0, 2, 0)
+                            task.wait(0.2)
+                            firetouchinterest(humanoidRootPart, vehicleSeat, 0)
+                            firetouchinterest(humanoidRootPart, vehicleSeat, 1)
+                            task.wait(0.5)
+                            if humanoid.SeatPart == vehicleSeat then
+                                seated = true
+                                break
+                            end
+                        end
+                    end
+                    task.wait(0.5)
+                end
+                
+                if not seated then
+                    Rayfield:Notify({ Title = "خطأ", Content = "ما قدرت اركب السفينة!", Duration = 3 })
+                    return
+                end
+                
+                local targetPlayer = Players:FindFirstChild(killTarget)
+                if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    local targetPos = targetPlayer.Character.HumanoidRootPart.Position
+                    local vehicle = Workspace.Vehicles:FindFirstChild(player.Name .. "Car")
+                    if vehicle then
+                        vehicle:SetPrimaryPartCFrame(CFrame.new(targetPos + Vector3.new(0, -2, 0)))
+                        humanoidRootPart.CFrame = CFrame.new(targetPos + Vector3.new(0, 5, 0))
+                        
+                        local crazyStart = tick()
+                        while tick() - crazyStart < 2 do
+                            local offset = Vector3.new(math.random(-8, 8), math.random(-3, 1), math.random(-8, 8))
+                            vehicle:SetPrimaryPartCFrame(CFrame.new(targetPos + Vector3.new(0, -2, 0) + offset))
+                            task.wait(0.05)
+                        end
+                    end
+                end
+                
+                local destination = Vector3.new(-86.00, -224.27, 34.57)
+                local vehicle = Workspace.Vehicles:FindFirstChild(player.Name .. "Car")
+                if vehicle then
+                    vehicle:SetPrimaryPartCFrame(CFrame.new(destination))
+                    humanoidRootPart.CFrame = CFrame.new(destination + Vector3.new(0, 5, 0))
+                    task.wait(0.5)
+                    vehicle:Destroy()
+                end
+                
+                humanoidRootPart.CFrame = CFrame.new(originalPosition)
+                humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+                Rayfield:Notify({ Title = "القتل", Content = "تم تنفيذ القتل!", Duration = 3 })
+            end)
+        end)
+    end
+})
+
+-- ═══════════════════════════════════════
+-- تبويب نسخ السكنات (المطور)
+-- ═══════════════════════════════════════
+local CopyTab = Window:CreateTab("نسخ سكنات", 4483362458)
+local Remotes = ReplicatedStorage:WaitForChild("Remotes")
+local copyTarget = nil
+local copyInProgress = false
+
+-- دالة لنسخ جميع التفاصيل بسرعة ودقة
+local function copyAvatarAdvanced(TPlayer)
+    if not TPlayer or not TPlayer.Character then
+        Rayfield:Notify({ Title = "خطأ", Content = "اللاعب غير موجود!", Duration = 3 })
+        return false
+    end
+    
+    if copyInProgress then
+        Rayfield:Notify({ Title = "تنبيه", Content = "يوجد نسخ قيد التنفيذ... انتظر قليلاً", Duration = 3 })
+        return false
+    end
+    
+    copyInProgress = true
+    
+    local LChar = lp.Character
+    local LHumanoid = LChar and LChar:FindFirstChildOfClass("Humanoid")
+    local THumanoid = TPlayer.Character:FindFirstChildOfClass("Humanoid")
+    
+    if not LHumanoid or not THumanoid then
+        copyInProgress = false
+        Rayfield:Notify({ Title = "خطأ", Content = "تعذر العثور على الهيئة!", Duration = 3 })
+        return false
+    end
+    
+    Rayfield:Notify({ Title = "نسخ سكنات", Content = "جاري نسخ سكنة: " .. TPlayer.Name, Duration = 5 })
+    
+    task.spawn(function()
+        pcall(function()
+            -- 1. حفظ التفاصيل الأصلية للاعب
+            local LDesc = LHumanoid:GetAppliedDescription()
+            local PDesc = THumanoid:GetAppliedDescription()
+            
+            -- 2. إزالة الملابس الحالية بسرعة
+            local accessoriesToRemove = {}
+            for _, acc in ipairs(LDesc:GetAccessories(true)) do
+                if acc.AssetId and tonumber(acc.AssetId) then
+                    table.insert(accessoriesToRemove, tonumber(acc.AssetId))
+                end
+            end
+            
+            for _, assetId in ipairs(accessoriesToRemove) do
+                pcall(function() Remotes.Wear:InvokeServer(assetId) end)
+                task.wait(0.15)
+            end
+            
+            if tonumber(LDesc.Shirt) then
+                pcall(function() Remotes.Wear:InvokeServer(tonumber(LDesc.Shirt)) end)
+                task.wait(0.15)
+            end
+            if tonumber(LDesc.Pants) then
+                pcall(function() Remotes.Wear:InvokeServer(tonumber(LDesc.Pants)) end)
+                task.wait(0.15)
+            end
+            if tonumber(LDesc.Face) then
+                pcall(function() Remotes.Wear:InvokeServer(tonumber(LDesc.Face)) end)
+                task.wait(0.15)
+            end
+            
+            -- 3. نسخ جسم الهدف
+            local argsBody = {[1] = {
+                [1] = PDesc.Torso,
+                [2] = PDesc.RightArm,
+                [3] = PDesc.LeftArm,
+                [4] = PDesc.RightLeg,
+                [5] = PDesc.LeftLeg,
+                [6] = PDesc.Head
+            }}
+            pcall(function() Remotes.ChangeCharacterBody:InvokeServer(unpack(argsBody)) end)
+            task.wait(1)
+            
+            -- 4. نسخ الملابس
+            if tonumber(PDesc.Shirt) then
+                pcall(function() Remotes.Wear:InvokeServer(tonumber(PDesc.Shirt)) end)
+                task.wait(0.2)
+            end
+            if tonumber(PDesc.Pants) then
+                pcall(function() Remotes.Wear:InvokeServer(tonumber(PDesc.Pants)) end)
+                task.wait(0.2)
+            end
+            if tonumber(PDesc.Face) then
+                pcall(function() Remotes.Wear:InvokeServer(tonumber(PDesc.Face)) end)
+                task.wait(0.2)
+            end
+            
+            -- 5. نسخ الإكسسوارات
+            local accessoriesToCopy = {}
+            for _, acc in ipairs(PDesc:GetAccessories(true)) do
+                if acc.AssetId and tonumber(acc.AssetId) then
+                    table.insert(accessoriesToCopy, tonumber(acc.AssetId))
+                end
+            end
+            
+            for _, assetId in ipairs(accessoriesToCopy) do
+                pcall(function() Remotes.Wear:InvokeServer(assetId) end)
+                task.wait(0.15)
+            end
+            
+            -- 6. نسخ لون البشرة
+            local SkinColor = TPlayer.Character:FindFirstChild("Body Colors")
+            if SkinColor then
+                pcall(function() Remotes.ChangeBodyColor:FireServer(tostring(SkinColor.HeadColor)) end)
+                task.wait(0.2)
+            end
+            
+            -- 7. نسخ الأنيميشنات
+            local AnimationsToCopy = {
+                IdleAnimation = PDesc.IdleAnimation,
+                WalkAnimation = PDesc.WalkAnimation,
+                RunAnimation = PDesc.RunAnimation,
+                JumpAnimation = PDesc.JumpAnimation,
+                SwimAnimation = PDesc.SwimAnimation,
+                FallAnimation = PDesc.FallAnimation,
+                ClimbAnimation = PDesc.ClimbAnimation
+            }
+            
+            for animName, animId in pairs(AnimationsToCopy) do
+                if tonumber(animId) then
+                    pcall(function() Remotes.Wear:InvokeServer(tonumber(animId)) end)
+                    task.wait(0.15)
+                end
+            end
+            
+            -- 8. نسخ اسم RP والبايو
+            local Bag = TPlayer:FindFirstChild("PlayersBag")
+            if Bag then
+                if Bag:FindFirstChild("RPName") and Bag.RPName.Value ~= "" then
+                    pcall(function() Remotes.RPNameText:FireServer("RolePlayName", Bag.RPName.Value) end)
+                    task.wait(0.2)
+                end
+                if Bag:FindFirstChild("RPBio") and Bag.RPBio.Value ~= "" then
+                    pcall(function() Remotes.RPNameText:FireServer("RolePlayBio", Bag.RPBio.Value) end)
+                    task.wait(0.2)
+                end
+                if Bag:FindFirstChild("RPNameColor") then
+                    pcall(function() Remotes.RPNameColor:FireServer("PickingRPNameColor", Bag.RPNameColor.Value) end)
+                    task.wait(0.15)
+                end
+                if Bag:FindFirstChild("RPBioColor") then
+                    pcall(function() Remotes.RPNameColor:FireServer("PickingRPBioColor", Bag.RPBioColor.Value) end)
+                    task.wait(0.15)
+                end
+            end
+            
+            -- 9. نسخ المظهر الخاص
+            if PDesc.SpecialAppearance then
+                pcall(function() Remotes.Wear:InvokeServer(PDesc.SpecialAppearance) end)
+                task.wait(0.2)
+            end
+            
+            -- 10. تحديث الشخصية
+            pcall(function()
+                if LHumanoid then
+                    LHumanoid:ApplyDescription(PDesc)
+                end
+            end)
+            
+            Rayfield:Notify({ Title = "نسخ سكنات", Content = "تم النسخ بنجاح!", Duration = 3 })
+        end)
+        
+        copyInProgress = false
+    end)
+    
+    return true
+end
+
+-- دالة نسخ سريع
+local function copyAvatarFast(TPlayer)
+    if not TPlayer or not TPlayer.Character then
+        Rayfield:Notify({ Title = "خطأ", Content = "اللاعب غير موجود!", Duration = 3 })
+        return false
+    end
+    
+    if copyInProgress then
+        Rayfield:Notify({ Title = "تنبيه", Content = "يوجد نسخ قيد التنفيذ...", Duration = 3 })
+        return false
+    end
+    
+    copyInProgress = true
+    
+    local LHumanoid = lp.Character and lp.Character:FindFirstChildOfClass("Humanoid")
+    local THumanoid = TPlayer.Character:FindFirstChildOfClass("Humanoid")
+    
+    if not LHumanoid or not THumanoid then
+        copyInProgress = false
+        return false
+    end
+    
+    Rayfield:Notify({ Title = "نسخ سكنات", Content = "جاري النسخ السريع...", Duration = 3 })
+    
+    task.spawn(function()
+        pcall(function()
+            local PDesc = THumanoid:GetAppliedDescription()
+            
+            local argsBody = {[1] = {
+                [1] = PDesc.Torso,
+                [2] = PDesc.RightArm,
+                [3] = PDesc.LeftArm,
+                [4] = PDesc.RightLeg,
+                [5] = PDesc.LeftLeg,
+                [6] = PDesc.Head
+            }}
+            pcall(function() Remotes.ChangeCharacterBody:InvokeServer(unpack(argsBody)) end)
+            task.wait(0.5)
+            
+            pcall(function() LHumanoid:ApplyDescription(PDesc) end)
+            
+            Rayfield:Notify({ Title = "نسخ سكنات", Content = "تم النسخ السريع بنجاح!", Duration = 3 })
+        end)
+        copyInProgress = false
+    end)
+    
+    return true
+end
+
+-- واجهة التبويب
+CopyTab:CreateSection("🎯 اختار اللاعب 🎯")
+
+CopyTab:CreateInput({
+    Name = "اكتب اسم اللاعب",
+    PlaceholderText = "اكتب الاسم هنا...",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(text)
+        local searchText = text:lower()
+        if #searchText >= 1 then
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Name:lower():find(searchText) and p ~= lp then
+                    copyTarget = p
+                    Rayfield:Notify({ Title = "نسخ سكنات", Content = "تم تحديد: " .. p.Name, Duration = 3 })
+                    return
+                end
+            end
+            Rayfield:Notify({ Title = "خطأ", Content = "اللاعب غير موجود!", Duration = 3 })
+        end
+        copyTarget = nil
+    end
+})
+
+CopyTab:CreateSection("📋 خيارات النسخ المتقدمة 📋")
+
+CopyTab:CreateButton({
+    Name = "✨ نسخ متقدم (جميع التفاصيل) ✨",
+    Callback = function()
+        if not copyTarget then
+            Rayfield:Notify({ Title = "خطأ", Content = "اختر لاعب أولاً!", Duration = 3 })
+            return
+        end
+        copyAvatarAdvanced(copyTarget)
+    end
+})
+
+CopyTab:CreateButton({
+    Name = "⚡ نسخ سريع (جسم + ملابس فقط) ⚡",
+    Callback = function()
+        if not copyTarget then
+            Rayfield:Notify({ Title = "خطأ", Content = "اختر لاعب أولاً!", Duration = 3 })
+            return
+        end
+        copyAvatarFast(copyTarget)
+    end
+})
+
+CopyTab:CreateSection("🎲 نسخ تلقائي 🎲")
+
+CopyTab:CreateButton({
+    Name = "انسخ سكنة اقرب لاعب",
+    Callback = function()
+        local LChar = lp.Character
+        if not LChar or not LChar:FindFirstChild("HumanoidRootPart") then return end
+        
+        local closest, minDist = nil, math.huge
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= lp and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                local dist = (LChar.HumanoidRootPart.Position - p.Character.HumanoidRootPart.Position).Magnitude
+                if dist < minDist then
+                    minDist = dist
+                    closest = p
+                end
+            end
+        end
+        
+        if closest then
+            copyAvatarAdvanced(closest)
+        else
+            Rayfield:Notify({ Title = "خطأ", Content = "لا يوجد لاعبين قريبين!", Duration = 3 })
+        end
+    end
+})
+
+CopyTab:CreateButton({
+    Name = "انسخ سكنة عشوائية",
+    Callback = function()
+        local others = {}
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= lp and p.Character then
+                table.insert(others, p)
+            end
+        end
+        
+        if #others == 0 then
+            Rayfield:Notify({ Title = "خطأ", Content = "لا يوجد لاعبين!", Duration = 3 })
+            return
+        end
+        
+        copyTarget = others[math.random(1, #others)]
+        Rayfield:Notify({ Title = "نسخ سكنات", Content = "تم اختيار عشوائياً: " .. copyTarget.Name, Duration = 3 })
+        copyAvatarAdvanced(copyTarget)
+    end
+})
+
+CopyTab:CreateSection("🎨 خيارات إضافية 🎨")
+
+CopyTab:CreateButton({
+    Name = "🔄 إعادة تعيين المظهر الأصلي",
+    Callback = function()
+        pcall(function()
+            local humanoid = lp.Character and lp.Character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                local defaultBody = {
+                    [1] = 1, [2] = 1, [3] = 1,
+                    [4] = 1, [5] = 1, [6] = 1
+                }
+                local argsBody = {[1] = defaultBody}
+                pcall(function() Remotes.ChangeCharacterBody:InvokeServer(unpack(argsBody)) end)
+                
+                Rayfield:Notify({ Title = "نسخ سكنات", Content = "تم إعادة تعيين المظهر!", Duration = 3 })
+            end
+        end)
+    end
+})
+
+CopyTab:CreateButton({
+    Name = "📋 نسخ اسم RP فقط",
+    Callback = function()
+        if not copyTarget then
+            Rayfield:Notify({ Title = "خطأ", Content = "اختر لاعب أولاً!", Duration = 3 })
+            return
+        end
+        
+        local Bag = copyTarget:FindFirstChild("PlayersBag")
+        if Bag and Bag:FindFirstChild("RPName") and Bag.RPName.Value ~= "" then
+            pcall(function() 
+                local RE = ReplicatedStorage:FindFirstChild("RE")
+                if RE then
+                    RE:FindFirstChild("1RPNam1eTex1t"):FireServer("RolePlayName", Bag.RPName.Value)
+                end
+            end)
+            Rayfield:Notify({ Title = "نسخ سكنات", Content = "تم نسخ اسم RP!", Duration = 3 })
+        else
+            Rayfield:Notify({ Title = "خطأ", Content = "اللاعب لا يملك اسم RP!", Duration = 3 })
+        end
+    end
+})
+
+CopyTab:CreateButton({
+    Name = "📖 نسخ بايو RP فقط",
+    Callback = function()
+        if not copyTarget then
+            Rayfield:Notify({ Title = "خطأ", Content = "اختر لاعب أولاً!", Duration = 3 })
+            return
+        end
+        
+        local Bag = copyTarget:FindFirstChild("PlayersBag")
+        if Bag and Bag:FindFirstChild("RPBio") and Bag.RPBio.Value ~= "" then
+            pcall(function() 
+                local RE = ReplicatedStorage:FindFirstChild("RE")
+                if RE then
+                    RE:FindFirstChild("1RPNam1eTex1t"):FireServer("RolePlayBio", Bag.RPBio.Value)
+                end
+            end)
+            Rayfield:Notify({ Title = "نسخ سكنات", Content = "تم نسخ بايو RP!", Duration = 3 })
+        else
+            Rayfield:Notify({ Title = "خطأ", Content = "اللاعب لا يملك بايو!", Duration = 3 })
+        end
+    end
+})
+
+-- تبويب الأغاني
+local MusicTab = Window:CreateTab("اغاني الفونك", 4483362458)
+
+local function playMusic(soundId)
+    pcall(function()
+        local args1 = {[1] = "SkateBoard"}
+        game:GetService("ReplicatedStorage").RE:FindFirstChild("1NoMoto1rVehicle1s"):FireServer(unpack(args1))
+        task.wait(0.3)
+        local args2 = {[1] = "PickingScooterMusicText", [2] = soundId}
+        game:GetService("ReplicatedStorage").RE:FindFirstChild("1NoMoto1rVehicle1s"):FireServer(unpack(args2))
+    end)
+end
+
+MusicTab:CreateSection("ادخل كود الاغنية")
+
+MusicTab:CreateInput({
+    Name = "ادخل الكود",
+    PlaceholderText = "هنا",
+    RemoveTextAfterFocusLost = false,
+    Callback = function(value)
+        if value and value ~= "" then
+            playMusic(value)
+            Rayfield:Notify({ Title = "الاغاني", Content = "جاري تشغيل الاغنية!", Duration = 3 })
+        end
+    end
+})
+
+MusicTab:CreateSection("فونك جاهز")
+
+MusicTab:CreateButton({ Name = "افخم فونك", Callback = function() playMusic("17647322226") Rayfield:Notify({ Title = "الاغاني", Content = "افخم فونك!", Duration = 3 }) end })
+MusicTab:CreateButton({ Name = "فونك غضب", Callback = function() playMusic("115859025716354") Rayfield:Notify({ Title = "الاغاني", Content = "فونك غضب!", Duration = 3 }) end })
+MusicTab:CreateButton({ Name = "فونك 5x30", Callback = function() playMusic("73966367524216") Rayfield:Notify({ Title = "الاغاني", Content = "فونك 5x30!", Duration = 3 }) end })
+MusicTab:CreateButton({ Name = "فونك عالمي", Callback = function() playMusic("76578817848504") Rayfield:Notify({ Title = "الاغاني", Content = "فونك عالمي!", Duration = 3 }) end })
+MusicTab:CreateButton({ Name = "فونك تيك توك", Callback = function() playMusic("93218265275853") Rayfield:Notify({ Title = "الاغاني", Content = "فونك تيك توك!", Duration = 3 }) end })
+MusicTab:CreateButton({ Name = "فونك ممتاز", Callback = function() playMusic("102402883551679") Rayfield:Notify({ Title = "الاغاني", Content = "فونك ممتاز!", Duration = 3 }) end })
+MusicTab:CreateButton({ Name = "اغنية عربية نادر", Callback = function() playMusic("134833118817796") Rayfield:Notify({ Title = "الاغاني", Content = "اغنية عربية نادر!", Duration = 3 }) end })
+MusicTab:CreateButton({ Name = "اغنية خليجي", Callback = function() playMusic("80281881556916") Rayfield:Notify({ Title = "الاغاني", Content = "اغنية خليجي!", Duration = 3 }) end })
+MusicTab:CreateButton({ Name = "ليبي", Callback = function() playMusic("126583820883563") Rayfield:Notify({ Title = "الاغاني", Content = "ليبي!", Duration = 3 }) end })
+MusicTab:CreateButton({ Name = "برازيل ازعاج", Callback = function() playMusic("73144366170218") Rayfield:Notify({ Title = "الاغاني", Content = "برازيل ازعاج!", Duration = 3 }) end })
+MusicTab:CreateButton({ Name = "فونك", Callback = function() playMusic("111991982650727") Rayfield:Notify({ Title = "الاغاني", Content = "فونك!", Duration = 3 }) end })
+MusicTab:CreateButton({ Name = "فونك ازعاج", Callback = function() playMusic("85682109892034") Rayfield:Notify({ Title = "الاغاني", Content = "فونك ازعاج!", Duration = 3 }) end })
+MusicTab:CreateButton({ Name = "فونك 2", Callback = function() playMusic("85341099264298") Rayfield:Notify({ Title = "الاغاني", Content = "فونك 2!", Duration = 3 }) end })
+MusicTab:CreateButton({ Name = "راب ازعاج", Callback = function() playMusic("125534796199396") Rayfield:Notify({ Title = "الاغاني", Content = "راب ازعاج!", Duration = 3 }) end })
+
+MusicTab:CreateSection("اغاني عراقيه")
+for _, data in ipairs({
+    {"راب عراقي 🧩", "116272643488592"},
+    {"اخذت بدنيا تعناط ودروس(حزين) 🙁", "112254940188047"},
+    {"شراره 🎻", "81023003196738"},
+    {"عراقي 🔥", "116815742960163"},
+    {"عراقي حب ❤", "105956659839019"},
+    {"فنان 🎸", "130012558337510"},
+    {"فنان راب 2 🔥🎤", "80945632184135"},
+    {"عراقي ابشرك (حزيز)🔥❤", "82396938710161"},
+    {"ميت انا من فراقك ❤🔥", "98313375960954"},
+    {"دم حزني (حزينه)", "99123490695024"},
+    {"الحجني يا شرطي 👾🔥", "120675895107276"},
+    {"الف صلاه عليك يا محمد", "103786200526639"},
+    {"ريمكس عراقي 🔥", "136909019669593"},
+    {"شعر عراقي 🎼", "83309655997452"},
+    {"وش علينا من الناس 🎲", "81808954656328"},
+    {"ازعاج قوي للصليب 🔥🎺", "91138951626248"},
+    {"ازعاج عراقي", "127840997774724"},
+    {"عراقي حزين 🔥", "106271890575602"},
+    {"عود عراقي 🎼", "94546035218751"},
+    {"قول الصواري نا🔥", "135009652401688"},
+    {"قررنا رحيلك واخترنا بديلك", "87510423075068"},
+    {"حلوه 👍🤗", "77951452994771"},
+    {"اتبوس ايدي 🔥(حزين)", "80039364766636"},
+    {"سبحيني بلمشائر 🔥", "80017487709494"},
+    {"غرقت بحبو 🔥", "118850051381032"},
+    {"تراني سكران 😂😂", "111811908070601"},
+    {"ازعاج صردع وهيبه 🔥", "72369698229901"}
+}) do
+    MusicTab:CreateButton({Name = data[1], Callback = function() playMusic(data[2]) end})
+end
+
+MusicTab:CreateSection("اغاني سب لا انصح بيها")
+for _, data in ipairs({
+    {"سب 1", "91611648163631"},
+    {"كشلي امك", "71491005545506"},
+    {"كسر كى*ك يا اجنبي", "79928045539255"},
+    {"العن الق*به ياوز الق*به", "131006804177346"},
+    {"متجيش مع واحد شر**ط", "99113135294997"},
+    {"سب بهجت صابر", "6713993281"},
+    {"كى**ك يا حلبي", "7942547789"},
+    {"سب 2", "131794008455004"},
+    {"سب 3", "88304661583351"},
+    {"سب 4", "94943308357738"},
+    {"ارسل كلمة كس", "6536444735"},
+    {"يابن القحبه", "5849978429"}
+}) do
+    MusicTab:CreateButton({Name = data[1], Callback = function() playMusic(data[2]) end})
+end
+
+MusicTab:CreateSection("اغاني اجنبيه")
+for _, data in ipairs({
+    {"اجنبيه 😂💔", "70782176012619"},
+    {"اجنبي حزين", "72320758533508"},
+    {"حلوه", "130721206402716"},
+    {"حلوه 2", "136869502216760"},
+    {"فونك اجنبي 🔥", "130721206402716"},
+    {"قوية 🔥", "103288558732219"}
+}) do
+    MusicTab:CreateButton({Name = data[1], Callback = function() playMusic(data[2]) end})
+end
+
+-- ═══════════════════════════════════════
+-- تبويب المطورين
+-- ═══════════════════════════════════════
+local DevTab = Window:CreateTab(" المطورين", 4483362458)
+
+DevTab:CreateLabel(" المطور الرئيسي")
+DevTab:CreateLabel("━━━━━━━━━━━━━━━━━━━━━━")
+DevTab:CreateParagraph({
+    Title = "كحيلان",
+    Content = "المطور الرسمي لـ KAHLAN HUB\n\nDEVELOPER - KAHLAN"
+})
+
+DevTab:CreateButton({
+    Name = " فتح بروفايل المطور",
+    Callback = function()
+        Rayfield:Notify({ Title = "بروفايل المطور", Content = "جاري فتح البروفايل...", Duration = 3 })
+        local userId = game:GetService("Players"):GetUserIdFromNameAsync("Kahlan_Dev")
+        setclipboard("https://www.roblox.com/users/" .. userId .. "/profile")
+        Rayfield:Notify({ Title = " تم النسخ", Content = "تم نسخ رابط البروفايل!", Duration = 3 })
+    end,
+})
+
+DevTab:CreateLabel("━━━━━━━━━━━━━━━━━━━━━━")
+DevTab:CreateLabel(" إحصائيات KAHLAN HUB")
+DevTab:CreateLabel("━━━━━━━━━━━━━━━━━━━━━━")
+DevTab:CreateLabel("الإصدار: V7.9 | VORTEX EDITION")
+DevTab:CreateLabel("تاريخ التحديث: 2025")
+DevTab:CreateLabel("عدد المميزات: 20+")
+DevTab:CreateLabel("━━━━━━━━━━━━━━━━━━━━━━")
+DevTab:CreateLabel(" روابط التواصل")
+DevTab:CreateLabel("━━━━━━━━━━━━━━━━━━━━━━")
+DevTab:CreateButton({
+    Name = " نسخ اسم المستخدم",
+    Callback = function()
+        setclipboard("Kahlan_Dev")
+        Rayfield:Notify({ Title = "تم النسخ", Content = "اسم المستخدم: Kahlan_Dev", Duration = 3 })
+    end,
+})
+
+-- تبويب السكربتات
+local ScriptsTab = Window:CreateTab(" السكربتات", 4483362458)
+
+ScriptsTab:CreateButton({
+    Name = " VR Hands Script",
+    Callback = function()
+        Rayfield:Notify({ Title = "VR Script", Content = "جاري تحميل VR Hands...", Duration = 3 })
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-VR7-45290"))()
+    end,
+})
+
+ScriptsTab:CreateButton({
+    Name = " مستكشف الاغاني",
+    Callback = function()
+        Rayfield:Notify({ Title = "مستكشف الاغاني", Content = "جاري التحميل...", Duration = 3 })
+        loadstring([[
+            local ScreenGui = Instance.new("ScreenGui")
+            local MainFrame = Instance.new("Frame")
+            local Title = Instance.new("TextLabel")
+            local ScrollingFrame = Instance.new("ScrollingFrame")
+            local UIListLayout = Instance.new("UIListLayout")
+            local RefreshBtn = Instance.new("TextButton")
+            local CloseBtn = Instance.new("TextButton")
+            local CountLabel = Instance.new("TextLabel")
+            local LoggedIDs = {}
+            local songCount = 0
+            
+            ScreenGui.Name = "RWMusicLogger"
+            ScreenGui.Parent = game.CoreGui
+            ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+            
+            MainFrame.Name = "MainFrame"
+            MainFrame.Parent = ScreenGui
+            MainFrame.BackgroundColor3 = Color3.fromRGB(15, 18, 25)
+            MainFrame.BorderSizePixel = 0
+            MainFrame.Position = UDim2.new(0.05, 0, 0.1, 0)
+            MainFrame.Size = UDim2.new(0, 380, 0, 500)
+            MainFrame.Active = true
+            MainFrame.Draggable = true
+            
+            local MainCorner = Instance.new("UICorner")
+            MainCorner.CornerRadius = UDim.new(0, 12)
+            MainCorner.Parent = MainFrame
+            
+            Title.Parent = MainFrame
+            Title.BackgroundColor3 = Color3.fromRGB(20, 25, 35)
+            Title.BorderSizePixel = 0
+            Title.Size = UDim2.new(1, 0, 0, 50)
+            Title.Font = Enum.Font.GothamBold
+            Title.Text = " مستكشف الاغاني"
+            Title.TextColor3 = Color3.fromRGB(0, 255, 150)
+            Title.TextSize = 20
+            
+            CloseBtn.Parent = MainFrame
+            CloseBtn.BackgroundColor3 = Color3.fromRGB(220, 50, 50)
+            CloseBtn.BorderSizePixel = 0
+            CloseBtn.Position = UDim2.new(0, 8, 0, 8)
+            CloseBtn.Size = UDim2.new(0, 35, 0, 35)
+            CloseBtn.Font = Enum.Font.GothamBold
+            CloseBtn.Text = "✕"
+            CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            CloseBtn.TextSize = 18
+            CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+            
+            CountLabel.Parent = MainFrame
+            CountLabel.BackgroundTransparency = 1
+            CountLabel.Position = UDim2.new(0, 10, 0, 55)
+            CountLabel.Size = UDim2.new(1, -20, 0, 25)
+            CountLabel.Font = Enum.Font.GothamBold
+            CountLabel.Text = "الاغاني المكتشفة: 0"
+            CountLabel.TextColor3 = Color3.fromRGB(0, 255, 150)
+            CountLabel.TextSize = 15
+            CountLabel.TextXAlignment = Enum.TextXAlignment.Left
+            
+            RefreshBtn.Parent = MainFrame
+            RefreshBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 220)
+            RefreshBtn.BorderSizePixel = 0
+            RefreshBtn.Position = UDim2.new(0, 10, 0, 85)
+            RefreshBtn.Size = UDim2.new(1, -20, 0, 40)
+            RefreshBtn.Font = Enum.Font.GothamBold
+            RefreshBtn.Text = " تحديث"
+            RefreshBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            RefreshBtn.TextSize = 15
+            
+            ScrollingFrame.Parent = MainFrame
+            ScrollingFrame.Active = true
+            ScrollingFrame.BackgroundColor3 = Color3.fromRGB(20, 23, 30)
+            ScrollingFrame.BorderSizePixel = 0
+            ScrollingFrame.Position = UDim2.new(0, 10, 0, 135)
+            ScrollingFrame.Size = UDim2.new(1, -20, 1, -145)
+            ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+            ScrollingFrame.ScrollBarThickness = 6
+            
+            UIListLayout.Parent = ScrollingFrame
+            UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+            UIListLayout.Padding = UDim.new(0, 8)
+            
+            local function updateCount()
+                CountLabel.Text = "الاغاني المكتشفة: " .. songCount
+            end
+            
+            local function addSong(name, id, duration)
+                if LoggedIDs[id] then return end
+                LoggedIDs[id] = true
+                songCount = songCount + 1
+                updateCount()
+                
+                local SongFrame = Instance.new("Frame")
+                SongFrame.Parent = ScrollingFrame
+                SongFrame.BackgroundColor3 = Color3.fromRGB(30, 35, 45)
+                SongFrame.Size = UDim2.new(1, -10, 0, 70)
+                
+                local NameLabel = Instance.new("TextLabel")
+                NameLabel.Parent = SongFrame
+                NameLabel.BackgroundTransparency = 1
+                NameLabel.Position = UDim2.new(0, 10, 0, 10)
+                NameLabel.Size = UDim2.new(1, -120, 0, 20)
+                NameLabel.Font = Enum.Font.GothamBold
+                NameLabel.Text = " " .. name
+                NameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+                NameLabel.TextSize = 13
+                NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+                
+                local InfoLabel = Instance.new("TextLabel")
+                InfoLabel.Parent = SongFrame
+                InfoLabel.BackgroundTransparency = 1
+                InfoLabel.Position = UDim2.new(0, 10, 0, 35)
+                InfoLabel.Size = UDim2.new(1, -120, 0, 20)
+                InfoLabel.Font = Enum.Font.Gotham
+                InfoLabel.Text = "ID: " .. id .. " | " .. math.floor(duration) .. "s"
+                InfoLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+                InfoLabel.TextSize = 11
+                InfoLabel.TextXAlignment = Enum.TextXAlignment.Left
+                
+                local CopyBtn = Instance.new("TextButton")
+                CopyBtn.Parent = SongFrame
+                CopyBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 100)
+                CopyBtn.Position = UDim2.new(1, -100, 0.5, -15)
+                CopyBtn.Size = UDim2.new(0, 90, 0, 30)
+                CopyBtn.Font = Enum.Font.GothamBold
+                CopyBtn.Text = " نسخ"
+                CopyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                CopyBtn.TextSize = 14
+                CopyBtn.MouseButton1Click:Connect(function()
+                    setclipboard(id)
+                    CopyBtn.Text = " تم"
+                    task.wait(1.5)
+                    CopyBtn.Text = " نسخ"
+                end)
+            end
+            
+            local function scanSongs()
+                for _, v in pairs(game:GetDescendants()) do
+                    if v:IsA("Sound") then
+                        pcall(function()
+                            local id = v.SoundId:match("%d+")
+                            if id and v.TimeLength >= 20 then
+                                addSong(v.Name ~= "" and v.Name or "أغنية", id, v.TimeLength)
+                            end
+                        end)
+                    end
+                end
+            end
+            
+            RefreshBtn.MouseButton1Click:Connect(function()
+                scanSongs()
+            end)
+            scanSongs()
+        ]])()
+    end,
+})
+
+-- ═══════════════════════════════════════
+-- تبويب Skybox (Nuke FlashBack)
+-- ═══════════════════════════════════════
+local SkyboxTab = Window:CreateTab("Skybox", 4483362458)
+
+SkyboxTab:CreateSection("Nuke FlashBack")
+
+SkyboxTab:CreateToggle({
+    Name = "تفعيل Nuke FlashBack",
+    CurrentValue = false,
+    Callback = function(value)
+        nukeFlashEnabled = value
+        if value then
+            local player = game.Players.LocalPlayer
+            local character = player.Character
+            if character then
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                if humanoid then
+                    local description = humanoid:GetAppliedDescription()
+                    savedNukeFlashBody = {
+                        Torso = description.Torso,
+                        RightArm = description.RightArm,
+                        LeftArm = description.LeftArm,
+                        RightLeg = description.RightLeg,
+                        LeftLeg = description.LeftLeg,
+                        Head = description.Head
+                    }
+                    task.wait(0.2)
+                    local args = {
+                        [1] = 123402086843885,
+                        [2] = 100839513065432,
+                        [3] = 78300682916056,
+                        [4] = 86276701020724,
+                        [5] = 78409653958165,
+                        [6] = 15093053680
+                    }
+                    pcall(function()
+                        game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(args)
+                    end)
+                    task.wait(0.3)
+                    local newAnim = Instance.new("Animation")
+                    newAnim.AnimationId = "rbxassetid://70883871260184"
+                    nukeFlashTrack = humanoid:LoadAnimation(newAnim)
+                    nukeFlashTrack.Priority = Enum.AnimationPriority.Action4
+                    nukeFlashTrack:Play(0.1, 1, 1)
+                    task.wait(0.1)
+                    nukeFlashTrack:AdjustSpeed(5)
+                    task.wait(0.3)
+                    local plankAnim = Instance.new("Animation")
+                    plankAnim.AnimationId = "rbxassetid://3695333486"
+                    flashRigidTrack = humanoid:LoadAnimation(plankAnim)
+                    flashRigidTrack.Priority = Enum.AnimationPriority.Movement
+                    flashRigidTrack:Play(0.1, 1, 0)
+                    Rayfield:Notify({ Title = "Skybox", Content = "تم تفعيل Nuke FlashBack", Duration = 3 })
+                end
+            end
+        else
+            stopFlashAnimations()
+            task.wait(0.2)
+            if next(savedNukeFlashBody) then
+                local player = game.Players.LocalPlayer
+                local character = player.Character
+                if character then
+                    local humanoid = character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        local restoreBody = {
+                            [1] = savedNukeFlashBody.Torso,
+                            [2] = savedNukeFlashBody.RightArm,
+                            [3] = savedNukeFlashBody.LeftArm,
+                            [4] = savedNukeFlashBody.RightLeg,
+                            [5] = savedNukeFlashBody.LeftLeg,
+                            [6] = savedNukeFlashBody.Head
+                        }
+                        local args = { [1] = restoreBody }
+                        pcall(function()
+                            game:GetService("ReplicatedStorage").Remotes.ChangeCharacterBody:InvokeServer(unpack(args))
+                        end)
+                        savedNukeFlashBody = {}
+                    end
+                end
+            end
+            Rayfield:Notify({ Title = "Skybox", Content = "تم إيقاف Nuke FlashBack واستعادة الشكل الأصلي", Duration = 3 })
+        end
+    end
+})
+
+SkyboxTab:CreateButton({
+    Name = "إيقاف التأثيرات (بدون استعادة الجسم)",
+    Callback = function()
+        stopFlashAnimations()
+        Rayfield:Notify({ Title = "Skybox", Content = "تم إيقاف التأثيرات فقط", Duration = 3 })
+    end
+})
+
+-- ═══════════════════════════════════════
+-- الأحداث
+-- ═══════════════════════════════════════
+Players.PlayerAdded:Connect(function(p)
+    Rayfield:Notify({ Title = "دخول", Content = p.Name .. " دخل السيرفر", Duration = 3 })
+end)
+
+Players.PlayerRemoving:Connect(function(p)
+    Rayfield:Notify({ Title = "خروج", Content = p.Name .. " غادر السيرفر", Duration = 3 })
+end)
+
+Rayfield:Notify({ Title = "KAHLAN HUB", Content = "تم التحميل بنجاح! 🔥👹", Duration = 5 })
+print("KAHLAN HUB V7.9 | VORTEX EDITION | by كحيلان")
