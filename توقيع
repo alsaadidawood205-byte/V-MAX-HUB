@@ -1,0 +1,530 @@
+-- Fluent UI Library
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
+local lp = Players.LocalPlayer
+
+-- إعداد النافذة الرئيسية
+local Window = Fluent:CreateWindow({
+    Title = "MITHAM HUB | ميثم هوب",
+    SubTitle = "إصدار M2 الممتاز",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 540),
+    Acrylic = false,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+-- المتغيرات الأساسية
+local faceSitEnabled, bangEnabled, strapUnderEnabled, headSitEnabled = false, false, false, false
+local bangTarget, bangSpeed = nil, 150
+local spyEnabled, spyTarget = false, nil
+local antiAfkEnabled = false
+
+-- متغيرات مضاد البانج
+local antiBangToggle = false
+local antiBangTeleportTime = 0.1
+local antiBangTargetPos = Vector3.new(905, -500, 0)
+local antiBangLastPos = Vector3.new(0,0,0)
+local antiBangVelConn
+
+-- إنشاء التبويبات
+local Tabs = {
+    Bang = Window:AddTab({ Title = "قسم البانج", Icon = "flame" }),
+    Radar = Window:AddTab({ Title = "الرادار", Icon = "eye" }),
+    Spy = Window:AddTab({ Title = "التجسس", Icon = "user-search" }),
+    Anti = Window:AddTab({ Title = "مضادات", Icon = "shield-check" }),
+    Extra = Window:AddTab({ Title = "سكربتات تهمك", Icon = "code" }),
+    Names = Window:AddTab({ Title = "الأسماء", Icon = "signature" })
+}
+
+-- [ زر MITHAM M2 العلوي ]
+local ScreenGui = Instance.new("ScreenGui")
+local ToggleButton = Instance.new("TextButton")
+local UIStroke = Instance.new("UIStroke")
+local UIGradient = Instance.new("UIGradient")
+local UICorner = Instance.new("UICorner")
+
+ScreenGui.Parent = game.CoreGui
+ToggleButton.Name = "MithamM2_Toggle"
+ToggleButton.Parent = ScreenGui
+ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ToggleButton.BackgroundTransparency = 0.4
+ToggleButton.Position = UDim2.new(0.5, -75, 0, 15)
+ToggleButton.Size = UDim2.new(0, 150, 0, 40)
+ToggleButton.Font = Enum.Font.SourceSansBold
+ToggleButton.Text = "MITHAM M2"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.TextSize = 18
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = ToggleButton
+UIStroke.Thickness = 3
+UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+UIStroke.Parent = ToggleButton
+UIGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)), ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 255))})
+UIGradient.Parent = UIStroke
+task.spawn(function() while true do UIGradient.Rotation = UIGradient.Rotation + 4 task.wait(0.01) end end)
+ToggleButton.MouseButton1Click:Connect(function() Window:Minimize() end)
+
+-- ========== [ تبويب الأسماء - أسلوب بروتون ] ==========
+local NameTab = Tabs.Names
+
+NameTab:AddSection({ Title = "تلوين الاسم والبيو", Icon = "rbxassetid://10709782758" })
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local NameRemote = ReplicatedStorage:WaitForChild("RE"):WaitForChild("1RPNam1eColo1r")
+
+local t = 0
+local rainbowSpeed = 2 
+local nameRainbow = false
+local bioRainbow = false
+local nameFast = false
+local bioFast = false
+
+local function updateRainbow(dt)
+    t += dt
+    local speed = rainbowSpeed
+    if nameFast then speed = 20 end
+    local r = math.sin(t * speed) * 0.5 + 0.5
+    local g = math.sin(t * speed + 2) * 0.5 + 0.5
+    local b = math.sin(t * speed + 4) * 0.5 + 0.5
+    local rainbow = Color3.new(r, g, b)
+
+    if nameRainbow or nameFast then
+        NameRemote:FireServer("PickingRPNameColor", rainbow)
+    end
+    if bioRainbow or bioFast then
+        NameRemote:FireServer("PickingRPBioColor", rainbow)
+    end
+end
+
+RunService.RenderStepped:Connect(function(dt)
+    updateRainbow(dt)
+end)
+
+NameTab:AddSlider({
+    Title = "سرعة التلوين",
+    Min = 0.1,
+    Max = 1000,
+    Default = 2,
+    Rounding = 1,
+    Callback = function(value)
+        rainbowSpeed = value
+    end
+})
+
+NameTab:AddToggle({
+    Title = "تلوين الاسم",
+    Default = false,
+    Callback = function(state)
+        nameRainbow = state
+    end
+})
+
+NameTab:AddToggle({
+    Title = "تلوين البايو",
+    Default = false,
+    Callback = function(state)
+        bioRainbow = state
+    end
+})
+
+NameTab:AddSection({ Title = "زخرفة الاسم والبيو", Icon = "rbxassetid://10723345088" })
+
+local Remote = ReplicatedStorage:WaitForChild("RE"):WaitForChild("1RPNam1eTex1t")
+
+local selectedBio = ""
+local selectedName = ""
+
+NameTab:AddInput({
+    Title = "اكتب ما تريد في البايو هنا",
+    Default = "",
+    Placeholder = "LOC4T",
+    Callback = function(Value)
+        selectedBio = Value
+    end
+})
+
+NameTab:AddInput({
+    Title = "اكتب ما تريد في الاسم هنا",
+    Default = "",
+    Placeholder = "LOC4T",
+    Callback = function(Value)
+        selectedName = Value
+    end
+})
+
+local bioTypingLoop = false
+local bioBackLoop = false
+local nameTypingLoop = false
+local nameBackLoop = false
+
+local function AnimateLoop(remoteName, getText, reverseFlag, stateRef)
+    task.spawn(function()
+        while stateRef() do
+            local text = getText()
+            if text \~= "" then
+                local buffer = ""
+                for i = 1, #text do
+                    if not stateRef() then return end
+                    buffer = string.sub(text, 1, i)
+                    Remote:FireServer(remoteName, buffer)
+                    task.wait(0.1)
+                end
+
+                if reverseFlag then
+                    for i = #text, 1, -1 do
+                        if not stateRef() then return end
+                        buffer = string.sub(text, 1, i)
+                        Remote:FireServer(remoteName, buffer)
+                        task.wait(0.1)
+                    end
+                end
+            else
+                task.wait(0.2)
+            end
+        end
+    end)
+end
+
+NameTab:AddToggle({
+    Title = "زخرفة البايو عادي",
+    Default = false,
+    Callback = function(state)
+        bioTypingLoop = state
+        if state then
+            AnimateLoop("RolePlayBio", function() return selectedBio end, false, function() return bioTypingLoop end)
+        end
+    end
+})
+
+NameTab:AddToggle({
+    Title = "زخرفة البايو سريع",
+    Default = false,
+    Callback = function(state)
+        bioBackLoop = state
+        if state then
+            AnimateLoop("RolePlayBio", function() return selectedBio end, true, function() return bioBackLoop end)
+        end
+    end
+})
+
+NameTab:AddToggle({
+    Title = "زخرفة الاسم عادي",
+    Default = false,
+    Callback = function(state)
+        nameTypingLoop = state
+        if state then
+            AnimateLoop("RolePlayName", function() return selectedName end, false, function() return nameTypingLoop end)
+        end
+    end
+})
+
+NameTab:AddToggle({
+    Title = "زخرفة الاسم سريع",
+    Default = false,
+    Callback = function(state)
+        nameBackLoop = state
+        if state then
+            AnimateLoop("RolePlayName", function() return selectedName end, true, function() return nameBackLoop end)
+        end
+    end
+})
+
+NameTab:AddSection({ Title = "سبام أسماء", Icon = "rbxassetid://10734933966" })
+
+local NameSpamActive = false 
+local SpamSpeed = 5
+local Name1, Name2, Name3, Name4, Name5 = "", "", "", "", ""
+
+NameTab:AddInput({Title = "الاسم 1", Default = "", Callback = function(v) Name1 = v end})
+NameTab:AddInput({Title = "الاسم 2", Default = "", Callback = function(v) Name2 = v end})
+NameTab:AddInput({Title = "الاسم 3", Default = "", Callback = function(v) Name3 = v end})
+NameTab:AddInput({Title = "الاسم 4", Default = "", Callback = function(v) Name4 = v end})
+NameTab:AddInput({Title = "الاسم 5", Default = "", Callback = function(v) Name5 = v end})
+
+NameTab:AddSlider({
+    Title = "سرعة سبام الاسماء",
+    Min = 1,
+    Max = 150,
+    Default = 5,
+    Rounding = 0,
+    Callback = function(v)
+        SpamSpeed = v
+    end
+})
+
+NameTab:AddToggle({
+    Title = "تفعيل سبام الاسماء",
+    Default = false,
+    Callback = function(state)
+        NameSpamActive = state
+        if NameSpamActive then
+            task.spawn(function()
+                while NameSpamActive do
+                    local names = {Name1, Name2, Name3, Name4, Name5}
+                    for _, name in ipairs(names) do
+                        if not NameSpamActive then break end
+                        if name \~= "" then
+                            ReplicatedStorage:WaitForChild("RE"):WaitForChild("1RPNam1eTex1t"):FireServer("RolePlayName", name)
+                            task.wait(1 / SpamSpeed)
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
+
+NameTab:AddSection({ Title = "سبام بايو", Icon = "rbxassetid://10734933966" })
+
+local BioSpamActive = false
+local Bio1, Bio2, Bio3, Bio4, Bio5 = "", "", "", "", ""
+
+NameTab:AddInput({Title = "البايو 1", Default = "", Callback = function(v) Bio1 = v end})
+NameTab:AddInput({Title = "البايو 2", Default = "", Callback = function(v) Bio2 = v end})
+NameTab:AddInput({Title = "البايو 3", Default = "", Callback = function(v) Bio3 = v end})
+NameTab:AddInput({Title = "البايو 4", Default = "", Callback = function(v) Bio4 = v end})
+NameTab:AddInput({Title = "البايو 5", Default = "", Callback = function(v) Bio5 = v end})
+
+NameTab:AddSlider({
+    Title = "سرعة سبام البايو",
+    Min = 1,
+    Max = 150,
+    Default = 5,
+    Rounding = 0,
+    Callback = function(v)
+        SpamSpeed = v
+    end
+})
+
+NameTab:AddToggle({
+    Title = "تفعيل سبام البايو",
+    Default = false,
+    Callback = function(state)
+        BioSpamActive = state
+        if state then
+            task.spawn(function()
+                while BioSpamActive do
+                    for _, bio in ipairs({Bio1, Bio2, Bio3, Bio4, Bio5}) do
+                        if not BioSpamActive then break end
+                        if bio \~= "" then
+                            pcall(function()
+                                ReplicatedStorage:WaitForChild("RE"):WaitForChild("1RPNam1eTex1t"):FireServer("RolePlayBio", bio)
+                            end)
+                            task.wait(1 / SpamSpeed)
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
+
+-- ========== [ قسم البانج مع +50 / -50 ] ==========
+local function forceStand() 
+    if lp.Character and lp.Character:FindFirstChild("Humanoid") then 
+        lp.Character.Humanoid.Sit = false 
+    end 
+end
+
+Tabs.Bang:AddInput("TargetInput", {
+    Title = "اسم اللاعب المستهدف", 
+    Callback = function(Value) 
+        for _, v in pairs(Players:GetPlayers()) do 
+            if v.Name:lower():find(Value:lower()) then 
+                bangTarget = v 
+                break 
+            end 
+        end 
+    end
+})
+
+local SpeedSlider = Tabs.Bang:AddSlider("BangSpeedSlider", {
+    Title = "سرعة حركة البانج",
+    Default = bangSpeed,
+    Min = 0,
+    Max = 1000,
+    Rounding = 1,
+    Callback = function(Value) 
+        bangSpeed = Value 
+    end
+})
+
+Tabs.Bang:AddButton({Title = "+50 سرعة", Callback = function()
+    bangSpeed = math.min(1000, bangSpeed + 50)
+    SpeedSlider:SetValue(bangSpeed)
+    Fluent:Notify({Title = "سرعة البانج", Content = "تم زيادة السرعة إلى: " .. bangSpeed, Duration = 2})
+end})
+
+Tabs.Bang:AddButton({Title = "-50 سرعة", Callback = function()
+    bangSpeed = math.max(0, bangSpeed - 50)
+    SpeedSlider:SetValue(bangSpeed)
+    Fluent:Notify({Title = "سرعة البانج", Content = "تم تقليل السرعة إلى: " .. bangSpeed, Duration = 2})
+end})
+
+Tabs.Bang:AddToggle("BangToggle", {Title = "تفعيل البانج (الخلفي)", Callback = function(V) 
+    bangEnabled = V 
+    if not V then forceStand() end 
+end})
+
+Tabs.Bang:AddToggle("FaceSitToggle", {Title = "تفعيل وضع الجلوس (الوجه)", Callback = function(V) 
+    faceSitEnabled = V 
+    if not V then forceStand() end 
+end})
+
+Tabs.Bang:AddToggle("StrapUnderToggle", {Title = "تفعيل الانبطاح السفلي", Callback = function(V) 
+    strapUnderEnabled = V 
+    if not V then forceStand() end 
+end})
+
+Tabs.Bang:AddToggle("HeadSitToggle", {Title = "الجلوس الثابت فوق الرأس", Callback = function(V) 
+    headSitEnabled = V 
+    if not V then forceStand() end 
+end})
+
+-- ========== [ قسم المضادات ] ==========
+Tabs.Anti:AddToggle("AntiBangToggle", {
+    Title = "مضاد بانج",
+    Description = "ينقلك لمكان آمن بعيداً عن اللاعبين",
+    Default = false,
+    Callback = function(state)
+        local character = lp.Character or lp.CharacterAdded:Wait()
+        local hrp = character:WaitForChild("HumanoidRootPart")
+        local function createTween(targetCFrame) return TweenService:Create(hrp, TweenInfo.new(antiBangTeleportTime, Enum.EasingStyle.Linear), {CFrame = targetCFrame}) end
+
+        if state then
+            antiBangLastPos = hrp.Position
+            local part = Instance.new("Part")
+            part.Size = Vector3.new(4, 1, 4)
+            part.Position = antiBangLastPos
+            part.Anchored = true; part.CanCollide = false; part.Transparency = 0.5; part.Name = "Gaze"; part.Parent = Workspace
+            Workspace.CurrentCamera.CameraSubject = part
+            antiBangToggle = true
+            Workspace.FallenPartsDestroyHeight = -1000
+            local tweenToTarget = createTween(CFrame.new(antiBangTargetPos))
+            tweenToTarget:Play()
+            tweenToTarget.Completed:Wait()
+            antiBangVelConn = RunService.Heartbeat:Connect(function() if antiBangToggle then hrp.Velocity = Vector3.zero end end)
+            Fluent:Notify({Title = "مضادات", Content = "تم تفعيل مضاد بانج", Duration = 3})
+        else
+            antiBangToggle = false
+            if antiBangVelConn then antiBangVelConn:Disconnect() end
+            local tweenBack = createTween(CFrame.new(antiBangLastPos))
+            tweenBack:Play()
+            tweenBack.Completed:Wait()
+            Workspace.FallenPartsDestroyHeight = -500
+            if lp.Character and lp.Character:FindFirstChild("Humanoid") then Workspace.CurrentCamera.CameraSubject = lp.Character.Humanoid end
+            if Workspace:FindFirstChild("Gaze") then Workspace.Gaze:Destroy() end
+            Fluent:Notify({Title = "مضادات", Content = "تم العودة للموقع الأصلي", Duration = 3})
+        end
+    end
+})
+
+Tabs.Anti:AddToggle("AntiSitToggle", {
+    Title = "مضاد الجلوس (Anti-Sit)",
+    Default = false,
+    Callback = function(state)
+        antiSitEnabled = state
+        for _, seat in next, Workspace:GetDescendants() do if seat:IsA("Seat") then seat.Disabled = state end end
+        workspace.DescendantAdded:Connect(function(seat) if seat:IsA("Seat") then seat.Disabled = antiSitEnabled end end)
+        Fluent:Notify({ Title = "الحماية", Content = state and "تم تفعيل حماية الجلوس!" or "تم ايقاف الحماية!", Duration = 3 })
+    end
+})
+
+Tabs.Anti:AddToggle("AntiFlingToggle", {
+    Title = "مضاد الفلنج (Anti-Fling)",
+    Default = false,
+    Callback = function(state)
+        if state then loadstring(game:HttpGet("https://raw.githubusercontent.com/NotAtomz/Atom-Scripts/refs/heads/main/anti%20fling"))() end
+    end
+})
+
+Tabs.Anti:AddToggle("AntiAFK", {Title = "مانع الخمول (Anti-AFK)", Callback = function(V) antiAfkEnabled = V end})
+
+Tabs.Anti:AddToggle("AntiLag", {
+    Title = "مضاد اللاغ (تقليل الجودة)",
+    Callback = function(Value)
+        if Value then
+            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+            Lighting.GlobalShadows = false
+            for _, v in pairs(game:GetDescendants()) do
+                if v:IsA("Part") or v:IsA("MeshPart") then v.Material = Enum.Material.Plastic v.Reflectance = 0
+                elseif v:IsA("Decal") or v:IsA("Texture") then v.Transparency = 1
+                elseif v:IsA("ParticleEmitter") then v.Enabled = false end
+            end
+        end
+    end
+})
+
+-- [ الرادار والتجسس ]
+local KeySection = Tabs.Radar:AddSection("سجل المغادرين")
+Players.PlayerRemoving:Connect(function(player) 
+    KeySection:AddParagraph({Title = "🔴 لاعب غادر: " .. player.Name, Content = "الوقت: " .. os.date("%X")}) 
+end)
+
+Tabs.Spy:AddInput("SpyTargetInput", {Title = "اسم اللاعب للتجسس", Callback = function(Value) 
+    for _, v in pairs(Players:GetPlayers()) do 
+        if v.Name:lower():find(Value:lower()) then 
+            spyTarget = v 
+            break 
+        end 
+    end 
+end})
+
+Tabs.Spy:AddToggle("SpyToggle", {Title = "تفعيل التجسس بالكاميرا", Callback = function(Value)
+    spyEnabled = Value
+    if Value and spyTarget and spyTarget.Character then 
+        Workspace.CurrentCamera.CameraSubject = spyTarget.Character.Humanoid 
+    else 
+        if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+            Workspace.CurrentCamera.CameraSubject = lp.Character.Humanoid 
+        end
+    end
+end})
+
+-- [ سكربتات تهمك ]
+Tabs.Extra:AddButton({Title = "سكربت NO9AT SAMLAT", Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-NO9AT-SAMLAT-47637"))() end})
+Tabs.Extra:AddButton({Title = "سكربت AUTOCLICK", Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-AUTOCLICK-48479"))() end})
+Tabs.Extra:AddButton({Title = "سكربت SPOOKI 9AMLA", Callback = function() loadstring(game:HttpGet("https://rawscripts.net/raw/Brookhaven-RP-SPOOKI-9AMLA-160909"))() end})
+Tabs.Extra:AddButton({Title = "سكربت AntiAFK 2", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/ArgetnarYT/scripts/main/AntiAfk2.lua"))() end})
+Tabs.Extra:AddButton({Title = "سكربت AntiAFK Hassan", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/hassanxzayn-lua/Anti-afk/main/antiafkbyhassanxzyn"))() end})
+
+-- [ الأنظمة التشغيلية ]
+lp.Idled:Connect(function() 
+    if antiAfkEnabled then 
+        game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0), Workspace.CurrentCamera.CFrame); 
+        task.wait(1); 
+        game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0), Workspace.CurrentCamera.CFrame) 
+    end 
+end)
+
+RunService.Heartbeat:Connect(function()
+    pcall(function()
+        if (faceSitEnabled or bangEnabled or strapUnderEnabled or headSitEnabled) and bangTarget and bangTarget.Character and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+            local targetChar = bangTarget.Character
+            local hrp = lp.Character.HumanoidRootPart
+            local move = math.sin(tick() * bangSpeed) * 1.5
+            hrp.Velocity = Vector3.zero
+            if faceSitEnabled then
+                lp.Character.Humanoid.Sit = true
+                hrp.CFrame = targetChar.Head.CFrame * CFrame.new(0, 0.2, -0.5 + move) * CFrame.Angles(0, math.rad(180), 0)
+            elseif bangEnabled then
+                lp.Character.Humanoid.Sit = false
+                hrp.CFrame = targetChar.HumanoidRootPart.CFrame * CFrame.new(0, 0.5, 1.1 + move)
+            elseif strapUnderEnabled then
+                lp.Character.Humanoid.Sit = false
+                hrp.CFrame = targetChar.HumanoidRootPart.CFrame * CFrame.new(0, -2.5, 1.1 + move) * CFrame.Angles(math.rad(90), 0, 0)
+            elseif headSitEnabled then
+                lp.Character.Humanoid.Sit = true
+                hrp.CFrame = targetChar.Head.CFrame * CFrame.new(0, 0.5, 0)
+            end
+        end
+    end)
+end)
+
+Tabs.Bang:Select()
+print("✅ MITHAM HUB M2 Loaded Successfully | Names Tab Replaced with Proton Style")
